@@ -29,36 +29,40 @@ anchor(Clock.prototype)
 var clock1 = new Clock();
 var click2 = new Clock();
 
-click2.before('tick',function(ctx, next){
+click2.use(function(ctx, next){
   ctx.stack.push('tick2');
   next();
 });
-click2.before('tock',function(ctx, next){
+click2.use('tick',function(ctx, next){
+  ctx.stack.push('more tick');
+  next();
+});
+click2.use('tock',function(ctx, next){
   next('booooom');
 });
 
-tape('middleware 1', function (t) {
+tape('anchor middleware', function (t) {
   clock1.tick(function(err,res){
     t.notOk(err, 'no error');
     t.deepEqual(res,['clock','tick','done']);
     t.end();
   });
 });
-tape('middleware 2', function (t) {
+tape('anchor middleware 2', function (t) {
   clock1.tock(function(err,res){
     t.notOk(err, 'no error');
     t.deepEqual(res,['clock','tick','tock','done']);
     t.end();
   });
 });
-tape('before hook',function(t){
+tape('instance middleware',function(t){
   click2.tick(function(err,res){
     t.notOk(err, 'no error');
-    t.deepEqual(res,['clock','tick','tick2','done']);
+    t.deepEqual(res,['clock','tick','tick2','more tick','done']);
     t.end();
   });
 });
-tape('before hook error',function(t){
+tape('instance middleware 2',function(t){
   click2.tock(function(err,res){
     t.notOk(res, 'no result');
     t.equal(err,'booooom', 'return error');

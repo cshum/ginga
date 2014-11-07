@@ -1,16 +1,16 @@
 # Anchor.js
 
-Anchor.js is a JavaScript utility that provides middleware and hook support for scaffolding asynchronous methods.
+Anchor.js is a JavaScript utility that provides middleware support for scaffolding asynchronous methods.
 
 ## Installation
 
-###Node.js
+#### Node.js
 
 ```bash
 $ npm install anchorjs
 ```
 
-### Browser
+#### Browser
 
 Include the Anchor.js browser build in your pages.
 
@@ -33,9 +33,6 @@ function Clock(){
 anchor(Clock.prototype)
   .use(function(ctx, next){
     ctx.stack = ['clock'];
-    next();
-  })
-  .use(function(ctx, next){
     ctx.stack.push(this._tick);
     next();
   })
@@ -54,15 +51,18 @@ function callback(ctx, done){
 var clock1 = new Clock();
 var click2 = new Clock();
 
-//additional hook on instance
-click2.before('tick',function(ctx, next){
+//additional middleware for each instance
+click2.use('tick',function(ctx, next){
   ctx.stack.push('tick2');
   next();
 });
-click2.before('tock',function(ctx, next){
+click2.use('tock',function(ctx, next){
   next('booooom'); //error
 });
 
 
 ```
+#### Changelog
 
+`0.1.2`
+- Simplify API

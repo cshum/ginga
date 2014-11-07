@@ -15,37 +15,7 @@
   }
 })('anchor', this, function () {
 
-  function hook(){
-    var args = Array.prototype.slice.call(arguments);
-
-    //before or after
-    var at = args.shift();
-    if(at !== 'before' && at !== 'after')
-      throw new Error('only before or after hook is allowed');
-
-    //method name
-    if(typeof args[0] !== 'string')
-      throw new Error('method name is not defined');
-    var name = args.shift();
-
-    //scope var init
-    //this refers to scope instance, not anchor instance
-    if(!this._methods) 
-      this._methods = {};
-    if(!this._methods[name]) 
-      this._methods[name] = {
-        before:[], after:[]
-      };
-
-    for(var i = 0, l = args.length; i<l; i++){
-      if(typeof args[i] === 'function')
-        this._methods[name][at].push(args[i]);
-      else
-        throw new Error('invalid function');
-    }
-
-    return this;
-  }
+  var emptyFn = function(){};
 
   function Anchor(scope){
     if(!(this instanceof Anchor))
@@ -54,28 +24,47 @@
     scope = scope || {};
 
     this._scope = scope;
+    this._methods = {};
     this._middleware = [];
 
-    this._scope.before = function(){
+    var self = this;
+
+    this._scope.use = function(){
       var args = Array.prototype.slice.call(arguments);
-      args.unshift('before');
-      return hook.apply(this, args);
-    };
-    this._scope.after = function(){
-      var args = Array.prototype.slice.call(arguments);
-      args.unshift('after');
-      return hook.apply(this, args);
+
+      //method name
+      var name = null;
+      if(typeof args[0] === 'string')
+        name = args.shift();
+
+      //this refers to scope instance
+
+      //scope var init
+      if(!this._middleware) 
+        this._middleware = {};
+
+      function use(name){
+        if(!this._middleware[name]) 
+          this._middleware[name] = [];
+        for(var i = 0, l = args.length; i<l; i++){
+          if(typeof args[i] === 'function')
+            this._middleware[name].push(args[i]);
+          else
+            throw new Error('invalid function');
+        }
+      }
+      if(name){
+        use.call(this,name);
+      }else{
+        //middleware on all methods
+        //self refers to anchor instance
+        for(name in self._methods)
+          use.call(this, name);
+      }
+
+      return this;
     };
   }
-
-  Anchor.prototype.hook = function(name, at, target){
-    this._scope[name] = function(){
-      var args = Array.prototype.slice.call(arguments);
-      args.unshift(at, target);
-      return hook.apply(this, args);
-    };
-    return this;
-  };
 
   Anchor.prototype.use = function(){
     var args = Array.prototype.slice.call(arguments);
@@ -109,7 +98,7 @@
       throw new Error('missing function body');
     var invoke = args[0];
 
-    //filter method middleware
+    //filter local middleware
     var middleware = [];
     for(var i = 0, l = this._middleware.length; i<l; i++){
       var _name = this._middleware[i].name;
@@ -117,7 +106,10 @@
         middleware.push(this._middleware[i].fn);
     }
 
-    //default pipe without hooks
+    //define method
+    this._methods[name] = options;
+
+    //pipe with local middleware
     var _pipe = [].concat(
       middleware,
       invoke
@@ -129,18 +121,17 @@
       //this refers to scope instance, not anchor instance
       var self = this;
 
-      var callback = null;
+      var callback = emptyFn;
       if (typeof args[args.length - 1] === 'function')
         callback = args.pop();
 
       var pipe = _pipe;
-      //pipe with hooks if exist
-      if(this._methods && this._methods[name])
+      //pipe scope middleware if exists
+      if(this._middleware && this._middleware[name])
         pipe = [].concat(
           middleware,
-          this._methods[name].before,
-          invoke,
-          this._methods[name].after
+          this._middleware[name],
+          invoke
         );
 
       //context object and next triggerer
@@ -153,18 +144,17 @@
       var index = 0;
       function next(){
         //trigger callback if args exist
-        if(arguments.length > 0 && callback)
+        if(arguments.length > 0){
           callback.apply(self, arguments);
-
-        //block next if error
-        if(arguments[0]) return;
-
+          return;
+        }
         index++;
         if(pipe[index]){
           //trigger next
           pipe[index].call(self, context, next);
         }else{
-          //trigger end
+          //trigger callback if no more pipe
+          callback.apply(self, arguments);
         }
       }
       pipe[index].call(self, context, next);
