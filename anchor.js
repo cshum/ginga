@@ -17,17 +17,22 @@
 
   var emptyFn = function(){};
 
+  //default params parsing middleware
   function params(ctx, next){
-    //todo: params parsing
-    next();
-  }
-  function defaults(ctx, next){
-    var params = ctx.options.params || {};
+    var def = ctx.options.params || [];
+    var obj = {};
+    var args = ctx.args;
+
+    //todo: add params parsing
+
+    //defaults mapping
     var source = ctx.options.defaults || {};
     for(var prop in source){
-      if(params[prop] === void 0)
-        params[prop] = source[prop];
+      if(obj[prop] === void 0)
+        obj[prop] = source[prop];
     }
+
+    ctx.params = obj;
     next();
   }
 
@@ -39,10 +44,8 @@
 
     this._scope = scope;
     this._methods = {};
-    //default middleware
     this._middleware = [
-      params,
-      defaults
+      params
     ];
 
     var self = this;
