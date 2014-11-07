@@ -28,10 +28,15 @@ anchor(Clock.prototype)
   .define('tick',callback)
   .define('tock',callback);
 
+function callback(ctx, done){
+  ctx.stack.push('done');
+  done(null, ctx.stack);
+}
+
 var clock1 = new Clock();
 var click2 = new Clock();
 
-//Hook support for instance
+//additional hook on instance
 click2.before('tick',function(ctx, next){
   ctx.stack.push('tick2');
   next();
@@ -39,6 +44,7 @@ click2.before('tick',function(ctx, next){
 click2.before('tock',function(ctx, next){
   next('booooom'); //error
 });
+
 
 ```
 
