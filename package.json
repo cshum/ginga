@@ -1,18 +1,25 @@
 {
   "name": "anchorjs",
-  "version": "0.1.0",
+  "version": "0.1.1",
   "description": "",
   "main": "anchor.js",
-  "scripts": {},
+  "scripts": {
+    "test": "set -e; for t in test/*.js; do node $t; done"
+  },
   "repository": {
     "type": "git",
     "url": "git@github.com:cshum/anchor.js.git"
   },
   "keywords": [
-    "api","util","hooks","middleware"
+    "api",
+    "util",
+    "hooks",
+    "middleware"
   ],
   "author": "Adrian C Shum <me@cshum.com>",
   "license": "MIT",
-  "devDependencies": {},
-  "dependencies": {}
+  "dependencies": {},
+  "devDependencies": {
+    "tape": "^3.0.2"
+  }
 }

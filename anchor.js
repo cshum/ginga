@@ -25,10 +25,14 @@
     this._middleware = [];
 
     this._scope.before = function(){
-      return hook.apply(this, ['before'].concat(arguments));
+      var args = Array.prototype.slice.call(arguments);
+      args.unshift('before');
+      return hook.apply(this, args);
     };
     this._scope.after = function(){
-      return hook.apply(this, ['after'].concat(arguments));
+      var args = Array.prototype.slice.call(arguments);
+      args.unshift('after');
+      return hook.apply(this, args);
     };
   }
 
@@ -66,7 +70,9 @@
 
   Anchor.prototype.hook = function(name, at, target){
     this._scope[name] = function(){
-      return hook.apply(this, [at, target].concat(arguments));
+      var args = Array.prototype.slice.call(arguments);
+      args.unshift(at, target);
+      return hook.apply(this, args);
     };
     return this;
   };
