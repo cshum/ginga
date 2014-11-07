@@ -92,8 +92,17 @@
   Anchor.prototype.use = function(){
     var args = Array.prototype.slice.call(arguments);
     var name = null;
+
+    if(Array.isArray(args[0])) {
+      name = args.shift();
+      for(var i = 0, l = name.length; i<l; i++)
+        this.use.apply(this, [name[i]].concat(args));
+      return this;
+    }
+
     if(typeof args[0] === 'string')
       name = args.shift();
+
     for(var i = 0, l = args.length; i<l; i++){
       if(typeof args[i] === 'function')
         this._middleware.push({
@@ -108,10 +117,16 @@
 
   Anchor.prototype.define = function(){
     var args = Array.prototype.slice.call(arguments);
-
-    if(typeof args[0] !== 'string')
-      throw new Error('method name is not defined');
     var name = args.shift();
+
+    if(Array.isArray(name)) {
+      for(var i = 0, l = name.length; i<l; i++)
+        this.define.apply(this, [name[i]].concat(args));
+      return this;
+    }
+
+    if(typeof name !== 'string')
+      throw new Error('method name is not defined');
 
     var options = {};
     if(typeof args[0] === 'object')
