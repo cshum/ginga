@@ -2,8 +2,26 @@
 
 Anchor.js is a JavaScript utility that provides middleware and hook support for scaffolding asynchronous methods.
 
-##Example
+## Installation
+
+###Node.js
+
+```bash
+$ npm install anchorjs
 ```
+
+### Browser
+
+Include the Anchor.js browser build in your pages.
+
+```html
+<script src="anchor.js" type="text/javascript"></script>
+```
+
+This will provide `anchor` as a global object, or `define` it if you are using AMD.
+
+##Example
+```js
 var anchor = require('anchorjs');
 
 function Clock(){
@@ -48,20 +66,3 @@ click2.before('tock',function(ctx, next){
 
 ```
 
-## Installation
-
-###Node.js
-
-```
-$ npm install anchorjs
-```
-
-### Browser
-
-Include the Anchor.js browser build in your pages.
-
-```html
-<script src="anchor.js" type="text/javascript"></script>
-```
-
-This will provide `anchor` as a global object, or `define` it if you are using AMD.
