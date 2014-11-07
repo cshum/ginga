@@ -1,12 +1,12 @@
 {
-  "name": "anchorjs",
+  "name": "anchor.js",
   "version": "0.1.0",
   "description": "",
   "main": "anchor.js",
   "scripts": {},
   "repository": {
     "type": "git",
-    "url": "git@github.com:cshum/anchorjs.git"
+    "url": "git@github.com:cshum/anchor.js.git"
   },
   "keywords": [
     "api","util","hooks","middleware"
