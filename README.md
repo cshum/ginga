@@ -40,20 +40,6 @@ click2.before('tock',function(ctx, next){
   next('booooom'); //error
 });
 
-//Results
-clock1.tick(function(err,res){
-  //res = ['clock','tick','done']
-});
-clock1.tock(function(err,res){
-  //res = ['clock','tick','tock','done']
-});
-click2.tick(function(err,res){
-  //res = ['clock','tick','tick2','done']
-});
-click2.tock(function(err,res){
-  //err = 'booooom'
-});
-
 ```
 
 ## Installation
