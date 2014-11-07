@@ -17,25 +17,6 @@
 
   var emptyFn = function(){};
 
-  //default params parsing middleware
-  function params(ctx, next){
-    var def = ctx.options.params || [];
-    var obj = {};
-    var args = ctx.args;
-
-    //todo: add params parsing
-
-    //defaults mapping
-    var source = ctx.options.defaults || {};
-    for(var prop in source){
-      if(obj[prop] === void 0)
-        obj[prop] = source[prop];
-    }
-
-    ctx.params = obj;
-    next();
-  }
-
   function Anchor(scope){
     if(!(this instanceof Anchor))
       return new Anchor(scope);
@@ -44,9 +25,7 @@
 
     this._scope = scope;
     this._methods = {};
-    this._middleware = [
-      params
-    ];
+    this._middleware = [];
 
     var self = this;
 
