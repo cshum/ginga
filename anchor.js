@@ -17,6 +17,29 @@
 
   var emptyFn = function(){};
 
+  function Context(){
+    this._events = {};
+  }
+  Context.prototype.on = function (type, fn){
+    this._events[type] = this._events[type] || [];
+
+    if(typeof type !== 'string')
+      throw new Error('event type is not defined');
+    if(typeof fn !== 'function')
+      throw new Error('invalid function');
+
+    this._events[type].push(fn);
+    return this;
+  }
+  Context.prototype.emit = function (type, args){
+    if(this._events[type]){
+      var stack = this._events[type];
+      for(var i = 0, l = stack.length; i<l; i++)
+        stack[i].apply(this, args);
+    }
+    return this;
+  }
+
   function Anchor(scope){
     if(!(this instanceof Anchor))
       return new Anchor(scope);
@@ -135,29 +158,33 @@
         );
 
       //context object and next triggerer
-      var context = {
-        method: name,
-        options: options,
-        args: args,
-        next: next
-      };
+      var ctx = new Context();
+      ctx.method = name;
+      ctx.scope = this;
+      ctx.options = options;
+      ctx.args = args;
+
       var index = 0;
       function next(){
         //trigger callback if args exist
         if(arguments.length > 0){
-          callback.apply(self, arguments);
+          var args = Array.prototype.slice.call(arguments);
+          callback.apply(self, args);
+          ctx.emit('end', args);
           return;
         }
         index++;
         if(pipe[index]){
           //trigger next
-          pipe[index].call(self, context, next);
+          pipe[index].call(self, ctx, next);
+          ctx.emit('next');
         }else{
-          //trigger callback if no more pipe
-          callback.apply(self, arguments);
+          //trigger empty callback if no more pipe
+          callback.apply(self);
+          ctx.emit('end');
         }
       }
-      pipe[index].call(self, context, next);
+      pipe[index].call(self, ctx, next);
 
       return this;
     };
