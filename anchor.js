@@ -15,27 +15,6 @@
   }
 })('anchor', this, function () {
 
-  function Anchor(scope){
-    if(!(this instanceof Anchor))
-      return new Anchor(scope);
-
-    scope = scope || {};
-
-    this._scope = scope;
-    this._middleware = [];
-
-    this._scope.before = function(){
-      var args = Array.prototype.slice.call(arguments);
-      args.unshift('before');
-      return hook.apply(this, args);
-    };
-    this._scope.after = function(){
-      var args = Array.prototype.slice.call(arguments);
-      args.unshift('after');
-      return hook.apply(this, args);
-    };
-  }
-
   function hook(){
     var args = Array.prototype.slice.call(arguments);
 
@@ -68,6 +47,27 @@
     return this;
   }
 
+  function Anchor(scope){
+    if(!(this instanceof Anchor))
+      return new Anchor(scope);
+
+    scope = scope || {};
+
+    this._scope = scope;
+    this._middleware = [];
+
+    this._scope.before = function(){
+      var args = Array.prototype.slice.call(arguments);
+      args.unshift('before');
+      return hook.apply(this, args);
+    };
+    this._scope.after = function(){
+      var args = Array.prototype.slice.call(arguments);
+      args.unshift('after');
+      return hook.apply(this, args);
+    };
+  }
+
   Anchor.prototype.hook = function(name, at, target){
     this._scope[name] = function(){
       var args = Array.prototype.slice.call(arguments);
@@ -93,8 +93,6 @@
     }
     return this;
   };
-
-  var emptyFn = function(){};
 
   Anchor.prototype.define = function(){
     var args = Array.prototype.slice.call(arguments);
@@ -134,8 +132,6 @@
       var callback = null;
       if (typeof args[args.length - 1] === 'function')
         callback = args.pop();
-      else 
-        callback = emptyFn;
 
       var pipe = _pipe;
       //pipe with hooks if exist
@@ -157,7 +153,7 @@
       var index = 0;
       function next(){
         //trigger callback if args exist
-        if(arguments.length > 0)
+        if(arguments.length > 0 && callback)
           callback.apply(self, arguments);
 
         //block next if error
