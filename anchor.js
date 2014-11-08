@@ -137,9 +137,9 @@
     if(typeof name !== 'string')
       throw new Error('method name is not defined');
 
-    var invoke = dummyFn;
-    if (typeof args[args.length - 1] === 'function')
-      invoke = args.pop();
+    if (typeof args[args.length - 1] !== 'function')
+      throw new Error('invoke function is not defined');
+    var invoke = args.pop();
 
     this.use.apply(this, args);
 
