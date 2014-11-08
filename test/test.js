@@ -24,17 +24,17 @@ anchor(Clock.prototype)
   });
 
 var clock1 = new Clock();
-var click2 = new Clock();
+var clock2 = new Clock();
 
-click2.use(function(ctx, next){
+clock2.use(function(ctx, next){
   ctx.logs.push('tick2');
   next();
 });
-click2.use('tick',function(ctx, next){
+clock2.use('tick',function(ctx, next){
   ctx.logs.push('more tick');
   next();
 });
-click2.use('tock',function(ctx, next){
+clock2.use('tock',function(ctx, next){
   next('booooom');
 });
 
@@ -53,14 +53,14 @@ tape('anchor middleware 2', function (t) {
   });
 });
 tape('instance middleware',function(t){
-  click2.tick(function(err,res){
+  clock2.tick(function(err,res){
     t.notOk(err, 'no error');
     t.deepEqual(res,['clock','tick','tick2','more tick','done']);
     t.end();
   });
 });
 tape('instance middleware 2',function(t){
-  click2.tock(function(err,res){
+  clock2.tock(function(err,res){
     t.notOk(res, 'no result');
     t.equal(err,'booooom', 'return error');
     t.end();

@@ -21,6 +21,9 @@ Include the Anchor.js browser build in your pages.
 This will provide `anchor` as a global object, or `define` it if you are using AMD.
 
 ##Example
+
+Middleware
+
 ```js
 var anchor = require('anchorjs');
 
@@ -40,27 +43,28 @@ anchor(Clock.prototype)
     ctx.stack.push(this._tock);
     next();
   })
-  .define('tick',callback)
-  .define('tock',callback);
-
-function callback(ctx, done){
-  ctx.stack.push('done');
-  done(null, ctx.stack);
-}
+  .define(['tick','tock'],function(ctx, done){
+    ctx.logs.push('done');
+    done(null, ctx.logs);
+  });
 
 var clock1 = new Clock();
-var click2 = new Clock();
+var clock2 = new Clock();
 
-//additional middleware for each instance
-click2.use('tick',function(ctx, next){
+//middleware on prototypal instance
+clock2.use('tick',function(ctx, next){
   ctx.stack.push('tick2');
   next();
 });
-click2.use('tock',function(ctx, next){
+clock2.use('tock',function(ctx, next){
   next('booooom'); //error
 });
 
-
+//Results
+clock1.tick(console.log.bind(console)); //null [ 'clock', 'tick', 'done' ]
+clock1.tock(console.log.bind(console)); //null ['clock','tick','tock','done']
+clock2.tick(console.log.bind(console)); //null ['clock','tick','tick2','more tick','done']
+clock2.tock(console.log.bind(console)); //'booooom'
 ```
 #### Changelog
 
