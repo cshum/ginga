@@ -16,6 +16,7 @@
 })('anchor', this, function () {
 
   var emptyFn = function(){};
+  var dummyFn = function(ctx, done){ done(null,null); }
 
   function Context(){
     this._events = {};
@@ -124,9 +125,10 @@
 
   Anchor.prototype.define = function(){
     var args = Array.prototype.slice.call(arguments);
-    var name = args.shift();
 
+    var name = args[0];
     if(Array.isArray(name)) {
+      name = args.shift();
       for(var i = 0, l = name.length; i<l; i++)
         this.define.apply(this, [name[i]].concat(args));
       return this;
@@ -135,13 +137,11 @@
     if(typeof name !== 'string')
       throw new Error('method name is not defined');
 
-    var options = {};
-    if(typeof args[0] === 'object')
-      options = args.shift();
+    var invoke = dummyFn;
+    if (typeof args[args.length - 1] === 'function')
+      invoke = args.pop();
 
-    if(typeof args[0] !== 'function')
-      throw new Error('missing function body');
-    var invoke = args[0];
+    this.use.apply(this, args);
 
     //filter local middleware
     var middleware = [];
@@ -152,7 +152,7 @@
     }
 
     //define method
-    this._methods[name] = options;
+    this._methods[name] = {};
 
     //pipe with local middleware
     var _pipe = [].concat(
@@ -183,7 +183,6 @@
       var ctx = new Context();
       ctx.method = name;
       ctx.scope = this;
-      ctx.options = options;
       ctx.args = args;
 
       var index = 0;
