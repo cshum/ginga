@@ -31,8 +31,6 @@ function Clock(){
   this._tick = 'tick';
   this._tock = 'tock';
 }
-
-//define methods
 anchor(Clock.prototype)
   .use(function(ctx, next){
     ctx.stack = ['clock'];
@@ -63,7 +61,7 @@ clock2.use('tock',function(ctx, next){
 //Results
 clock1.tick(console.log.bind(console)); //null [ 'clock', 'tick', 'done' ]
 clock1.tock(console.log.bind(console)); //null ['clock','tick','tock','done']
-clock2.tick(console.log.bind(console)); //null ['clock','tick','tick2','more tick','done']
+clock2.tick(console.log.bind(console)); //null ['clock','tick','tick2','done']
 clock2.tock(console.log.bind(console)); //'booooom'
 ```
 #### Changelog
