@@ -54,35 +54,42 @@
 
     this._scope.use = function(){
       var args = Array.prototype.slice.call(arguments);
+      //this refers to scope instance
+      //self refers to anchor instance
 
-      //method name
       var name = null;
+
+      //method name array
+      if(Array.isArray(args[0])){
+        name = args.shift();
+        for(var i = 0, l = name.length; i<l; i++)
+          this.use.apply(this, [name[i]].concat(args));
+        return this;
+      }
+
+      //single method name
       if(typeof args[0] === 'string')
         name = args.shift();
 
-      //this refers to scope instance
+      //no method name, iterate all methods
+      if(!name){
+        for(name in self._methods)
+          this.use.apply(this, [name].concat(args));
+        return this;
+      }
 
       //scope var init
       if(!this._middleware) 
         this._middleware = {};
 
-      function use(name){
-        if(!this._middleware[name]) 
-          this._middleware[name] = [];
-        for(var i = 0, l = args.length; i<l; i++){
-          if(typeof args[i] === 'function')
-            this._middleware[name].push(args[i]);
-          else
-            throw new Error('invalid function');
-        }
-      }
-      if(name){
-        use.call(this,name);
-      }else{
-        //middleware on all methods
-        //self refers to anchor instance
-        for(name in self._methods)
-          use.call(this, name);
+      if(!this._middleware[name]) 
+        this._middleware[name] = [];
+
+      for(var i = 0, l = args.length; i<l; i++){
+        if(typeof args[i] === 'function')
+          this._middleware[name].push(args[i]);
+        else
+          throw new Error('invalid function');
       }
 
       return this;
