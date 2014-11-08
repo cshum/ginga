@@ -13,11 +13,9 @@ $ npm install anchorjs
 #### Browser
 
 Include the Anchor.js browser build in your pages.
-
 ```html
 <script src="anchor.js" type="text/javascript"></script>
 ```
-
 This will provide `anchor` as a global object, or `define` it if you are using AMD.
 
 ##Example
@@ -33,12 +31,11 @@ function Clock(){
 }
 anchor(Clock.prototype)
   .use(function(ctx, next){
-    ctx.stack = ['clock'];
-    ctx.stack.push(this._tick);
+    ctx.logs = ['clock',this._tick];
     next();
   })
   .use('tock',function(ctx, next){
-    ctx.stack.push(this._tock);
+    ctx.logs.push(this._tock);
     next();
   })
   .define(['tick','tock'],function(ctx, done){
@@ -51,7 +48,7 @@ var clock2 = new Clock();
 
 //middleware on prototypal instance
 clock2.use('tick',function(ctx, next){
-  ctx.stack.push('tick2');
+  ctx.logs.push('tick2');
   next();
 });
 clock2.use('tock',function(ctx, next){
