@@ -17,9 +17,69 @@
 
   function emptyFn(ctx, cb){
     if(typeof cb === 'function')
-      cb(null, null);
+      cb();
+    return true;
   }
 
+  //type checking for params parser
+  var types = {
+
+  };
+  //params parsing middleware
+  function paramsParser(){
+    var args = Array.prototype.slice.call(arguments);
+    var spec = [];
+    var min = 0, max = args.length;
+    var i, l;
+    for(i = 0, l = args.length; i<l; i++){
+      var obj = {};
+      var str = args[i];
+      var required = str.slice(-1) !== '?';
+      obj.required = required;
+
+      if(required)
+        min++;
+      else
+        str = str.slice(0,-1);
+
+      var arg = str.split(':');
+      obj.name = arg[0];
+      if(arg.length > 1){
+        //defined type
+        var check = types[arg[1]];
+        if(typeof check !== 'function')
+          throw new Error('type not exist');
+        obj.check = check;
+      }else
+        obj.check = emptyFn;
+      spec.push(obj);
+    }
+    return function(ctx, next){
+      var i, l;
+      var args = ctx.args;
+      var params = {};
+      if(args.length < min)
+        return next(new Error('Missing parameters.'));
+      var index = 0;
+      for(i = 0, l = args.length; i<l; i++){
+        var val = args[i];
+        while(index < max && !spec[index].check(val) && !spec[index].required){
+          index++;
+        }
+        if(index < max && spec[index].check(val)){
+          var def = spec[index];
+          params[def.name] = val;
+          index++;
+        }else{
+          return next(new Error('Missing parameters.'));
+        }
+      }
+      ctx.params = params;
+      next();
+    };
+  }
+
+  //Context constructor
   function Context(){
     this._events = {};
   }
@@ -43,6 +103,7 @@
     return this;
   };
 
+  //Anchor constructor
   function Anchor(scope){
     if(!(this instanceof Anchor))
       return new Anchor(scope);
@@ -60,12 +121,12 @@
       //this refers to scope instance
       //self refers to anchor instance
 
-      var name = null;
+      var name = null, i, l;
 
       //method name array
       if(Array.isArray(args[0])){
         name = args.shift();
-        for(var i = 0, l = name.length; i<l; i++)
+        for(i = 0, l = name.length; i<l; i++)
           this.use.apply(this, [name[i]].concat(args));
         return this;
       }
@@ -88,7 +149,7 @@
       if(!this._middleware[name]) 
         this._middleware[name] = [];
 
-      for(var i = 0, l = args.length; i<l; i++){
+      for(i = 0, l = args.length; i<l; i++){
         if(typeof args[i] === 'function')
           this._middleware[name].push(args[i]);
         else
@@ -101,11 +162,11 @@
 
   Anchor.prototype.use = function(){
     var args = Array.prototype.slice.call(arguments);
-    var name = null;
+    var name = null, i, l;
 
     if(Array.isArray(args[0])) {
       name = args.shift();
-      for(var i = 0, l = name.length; i<l; i++)
+      for(i = 0, l = name.length; i<l; i++)
         this.use.apply(this, [name[i]].concat(args));
       return this;
     }
@@ -113,7 +174,7 @@
     if(typeof args[0] === 'string')
       name = args.shift();
 
-    for(var i = 0, l = args.length; i<l; i++){
+    for(i = 0, l = args.length; i<l; i++){
       if(typeof args[i] === 'function')
         this._middleware.push({
           name: name,
@@ -127,11 +188,12 @@
 
   Anchor.prototype.define = function(){
     var args = Array.prototype.slice.call(arguments);
+    var i, l;
 
     var name = args[0];
     if(Array.isArray(name)) {
       name = args.shift();
-      for(var i = 0, l = name.length; i<l; i++)
+      for(i = 0, l = name.length; i<l; i++)
         this.define.apply(this, [name[i]].concat(args));
       return this;
     }
@@ -147,7 +209,7 @@
 
     //filter local middleware
     var middleware = [];
-    for(var i = 0, l = this._middleware.length; i<l; i++){
+    for(i = 0, l = this._middleware.length; i<l; i++){
       var _name = this._middleware[i].name;
       if(!_name || _name === name)
         middleware.push(this._middleware[i].fn);
@@ -217,6 +279,7 @@
   Anchor.prototype.scope = function(){
     return this._scope;
   };
+  Anchor.paramsParser = paramsParser;
 
   return Anchor;
 });
