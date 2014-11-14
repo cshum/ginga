@@ -15,8 +15,10 @@
   }
 })('anchor', this, function () {
 
-  var emptyFn = function(){};
-  var dummyFn = function(ctx, done){ done(null,null); }
+  function emptyFn(ctx, cb){
+    if(typeof cb === 'function')
+      cb(null, null);
+  }
 
   function Context(){
     this._events = {};
@@ -31,7 +33,7 @@
 
     this._events[type].push(fn);
     return this;
-  }
+  };
   Context.prototype.emit = function (type, args){
     if(this._events[type]){
       var stack = this._events[type];
@@ -39,7 +41,7 @@
         stack[i].apply(this, args);
     }
     return this;
-  }
+  };
 
   function Anchor(scope){
     if(!(this instanceof Anchor))
@@ -137,9 +139,9 @@
     if(typeof name !== 'string')
       throw new Error('method name is not defined');
 
-    if (typeof args[args.length - 1] !== 'function')
-      throw new Error('invoke function is not defined');
     var invoke = args.pop();
+    if (typeof invoke !== 'function')
+      invoke = emptyFn;
 
     this.use.apply(this, args);
 
