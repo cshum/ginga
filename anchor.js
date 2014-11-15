@@ -29,15 +29,16 @@
   function paramsParser(){
     var args = Array.prototype.slice.call(arguments);
     var spec = [];
-    var min = 0, max = args.length;
+    var specLen = args.length;
     var i, l;
-    for(i = 0, l = args.length; i<l; i++){
+    for(i = 0; i<specLen; i++){
       var obj = {};
       var str = args[i];
-      var required = str.slice(-1) !== '?';
-      obj.required = required;
 
-      if(required)
+      obj.required = str.slice(-1) !== '?' || str.slice(-1) === '+';
+      obj.list = str.slice(-1) === '+' || str.slice(-1) === '*';
+
+      if(obj.required)
         min++;
       else
         str = str.slice(0,-1);
@@ -59,11 +60,10 @@
       var args = ctx.args;
       var len = args.length;
       var params = {};
-      if(args.length < min)
-        return next(new Error('Missing parameters.'));
       var index = 0;
       var offset = 0;
-      while(offset < len && index < max){
+      var acc = [];
+      while(offset < len && index < specLen){
         while(
           !spec[index].check(args[offset]) && 
           !spec[index].required
@@ -71,11 +71,12 @@
           index++;
           if(args[offset] === null || args[offset] === undefined)
             offset++;
-          if(index >= max || offset >= len)
+          if(index >= specLen || offset >= len)
             return next(new Error('Missing parameters.'));
         }
         if( !spec[index].check(args[offset]) )
           return next(new Error('Missing parameters.'));
+
         params[spec[index].name] = args[offset];
         index++;
         offset++;
