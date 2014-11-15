@@ -57,22 +57,28 @@
     return function(ctx, next){
       var i, l;
       var args = ctx.args;
+      var len = args.length;
       var params = {};
       if(args.length < min)
         return next(new Error('Missing parameters.'));
       var index = 0;
-      for(i = 0, l = args.length; i<l; i++){
-        var val = args[i];
-        while(index < max && !spec[index].check(val) && !spec[index].required){
+      var offset = 0;
+      while(offset < len && index < max){
+        while(
+          !spec[index].check(args[offset]) && 
+          !spec[index].required
+        ){
           index++;
+          if(args[offset] === null || args[offset] === undefined)
+            offset++;
+          if(index >= max || offset >= len)
+            return next(new Error('Missing parameters.'));
         }
-        if(index < max && spec[index].check(val)){
-          var def = spec[index];
-          params[def.name] = val;
-          index++;
-        }else{
+        if( !spec[index].check(args[offset]) )
           return next(new Error('Missing parameters.'));
-        }
+        params[spec[index].name] = args[offset];
+        index++;
+        offset++;
       }
       ctx.params = params;
       next();
@@ -279,7 +285,7 @@
   Anchor.prototype.scope = function(){
     return this._scope;
   };
-  Anchor.paramsParser = paramsParser;
+  Anchor.params = paramsParser;
 
   return Anchor;
 });
