@@ -21,71 +21,6 @@
     return true;
   }
 
-  //type checking for params parser
-  var types = {
-
-  };
-  //params parsing middleware
-  function paramsParser(){
-    var args = Array.prototype.slice.call(arguments);
-    var spec = [];
-    var specLen = args.length;
-    var i, l;
-    for(i = 0; i<specLen; i++){
-      var obj = {};
-      var str = args[i];
-
-      obj.required = str.slice(-1) !== '?' || str.slice(-1) === '+';
-      obj.list = str.slice(-1) === '+' || str.slice(-1) === '*';
-
-      if(obj.required)
-        min++;
-      else
-        str = str.slice(0,-1);
-
-      var arg = str.split(':');
-      obj.name = arg[0];
-      if(arg.length > 1){
-        //defined type
-        var check = types[arg[1]];
-        if(typeof check !== 'function')
-          throw new Error('type not exist');
-        obj.check = check;
-      }else
-        obj.check = emptyFn;
-      spec.push(obj);
-    }
-    return function(ctx, next){
-      var i, l;
-      var args = ctx.args;
-      var len = args.length;
-      var params = {};
-      var index = 0;
-      var offset = 0;
-      var acc = [];
-      while(offset < len && index < specLen){
-        while(
-          !spec[index].check(args[offset]) && 
-          !spec[index].required
-        ){
-          index++;
-          if(args[offset] === null || args[offset] === undefined)
-            offset++;
-          if(index >= specLen || offset >= len)
-            return next(new Error('Missing parameters.'));
-        }
-        if( !spec[index].check(args[offset]) )
-          return next(new Error('Missing parameters.'));
-
-        params[spec[index].name] = args[offset];
-        index++;
-        offset++;
-      }
-      ctx.params = params;
-      next();
-    };
-  }
-
   //Context constructor
   function Context(){
     this._events = {};
@@ -269,7 +204,6 @@
         if(pipe[index]){
           //trigger next
           pipe[index].call(self, ctx, next);
-          ctx.emit('next');
         }else{
           //trigger empty callback if no more pipe
           callback.apply(self);
@@ -286,7 +220,6 @@
   Anchor.prototype.scope = function(){
     return this._scope;
   };
-  Anchor.params = paramsParser;
 
   return Anchor;
 });
