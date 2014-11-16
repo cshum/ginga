@@ -15,9 +15,30 @@
   }
 })('anchor', this, function () {
 
+  var is = {
+    'string': function(val){
+      return typeof val === 'string';
+    },
+    'function': function(val){
+      return typeof val === 'function';
+    },
+    'number': function(val){
+      return typeof val === 'number';
+    },
+    'object': function(val){
+      var type = typeof obj;
+      return type === 'function' || type === 'object' && !!obj;
+    },
+    'array': function(val){
+      if(Array.isArray)
+        return Array.isArray(val);
+      else
+        return Object.prototype.call(val) === '[object Array]';
+    }
+  };
+
   function emptyFn(ctx, cb){
-    if(typeof cb === 'function')
-      cb();
+    if(is.function(cb)) cb();
     return true;
   }
 
@@ -28,9 +49,9 @@
   Context.prototype.on = function (type, fn){
     this._events[type] = this._events[type] || [];
 
-    if(typeof type !== 'string')
+    if(is.string(type))
       throw new Error('event type is not defined');
-    if(typeof fn !== 'function')
+    if(is.function(fn))
       throw new Error('invalid function');
 
     this._events[type].push(fn);
@@ -66,7 +87,7 @@
       var name = null, i, l;
 
       //method name array
-      if(Array.isArray(args[0])){
+      if(is.array(args[0])){
         name = args.shift();
         for(i = 0, l = name.length; i<l; i++)
           this.use.apply(this, [name[i]].concat(args));
@@ -74,7 +95,7 @@
       }
 
       //single method name
-      if(typeof args[0] === 'string')
+      if(is.string(args[0]))
         name = args.shift();
 
       //no method name, iterate all methods
@@ -92,7 +113,7 @@
         this._middleware[name] = [];
 
       for(i = 0, l = args.length; i<l; i++){
-        if(typeof args[i] === 'function')
+        if(is.function(args[i]))
           this._middleware[name].push(args[i]);
         else
           throw new Error('invalid function');
@@ -113,11 +134,11 @@
       return this;
     }
 
-    if(typeof args[0] === 'string')
+    if(is.string(args[0]))
       name = args.shift();
 
     for(i = 0, l = args.length; i<l; i++){
-      if(typeof args[i] === 'function')
+      if(is.function(args[i]))
         this._middleware.push({
           name: name,
           fn: args[i]
@@ -140,11 +161,11 @@
       return this;
     }
 
-    if(typeof name !== 'string')
+    if(!is.string(name))
       throw new Error('method name is not defined');
 
     var invoke = args.pop();
-    if (typeof invoke !== 'function')
+    if (!is.function(invoke))
       invoke = emptyFn;
 
     this.use.apply(this, args);
@@ -173,7 +194,7 @@
       var self = this;
 
       var callback = emptyFn;
-      if (typeof args[args.length - 1] === 'function')
+      if (is.function(args[args.length - 1]))
         callback = args.pop();
 
       var pipe = _pipe;
