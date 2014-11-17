@@ -127,7 +127,7 @@
     var args = Array.prototype.slice.call(arguments);
     var name = null, i, l;
 
-    if(Array.isArray(args[0])) {
+    if(is.array(args[0])) {
       name = args.shift();
       for(i = 0, l = name.length; i<l; i++)
         this.use.apply(this, [name[i]].concat(args));
@@ -154,7 +154,7 @@
     var i, l;
 
     var name = args[0];
-    if(Array.isArray(name)) {
+    if(is.array(name)) {
       name = args.shift();
       for(i = 0, l = name.length; i<l; i++)
         this.define.apply(this, [name[i]].concat(args));
