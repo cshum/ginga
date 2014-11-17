@@ -105,13 +105,18 @@
     };
   }
 
-
   //defaults middleware
   function defaults(){
     var args = Array.prototype.slice.call(arguments);
     return function(ctx, next){
       ctx.params = ctx.params || {};
-
+      for(var i = 0, l = args.length; i < l; i++){
+        var source = args[i];
+        for(var prop in source){
+          if(ctx.params[prop] === void 0)
+            ctx.params[prop] = source[prop];
+        }
+      }
       next();
     };
   }
