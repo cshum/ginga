@@ -26,8 +26,7 @@
       return typeof val === 'number';
     },
     'object': function(val){
-      var type = typeof obj;
-      return type === 'function' || type === 'object' && !!obj;
+      return typeof val === 'object' && !!val;
     },
     'array': function(val){
       if(Array.isArray)
@@ -86,11 +85,17 @@
 
       var name = null, i, l;
 
-      //method name array
       if(is.array(args[0])){
-        name = args.shift();
-        for(i = 0, l = name.length; i<l; i++)
-          this.use.apply(this, [name[i]].concat(args));
+        //use(['a','b','c'], fn)
+        var arr = args.shift();
+        for(i = 0, l = arr.length; i<l; i++)
+          this.use.apply(this, [arr[i]].concat(args));
+        return this;
+      }else if(is.object(args[0])){
+        //use({ a: fn1, b: fn2, c: fn3 })
+        var obj = args.shift();
+        for(i in obj)
+          this.use.call(this, i, obj[i]);
         return this;
       }
 
@@ -127,10 +132,17 @@
     var args = Array.prototype.slice.call(arguments);
     var name = null, i, l;
 
-    if(is.array(args[0])) {
-      name = args.shift();
-      for(i = 0, l = name.length; i<l; i++)
-        this.use.apply(this, [name[i]].concat(args));
+    if(is.array(args[0])){
+      //use(['a','b','c'], fn)
+      var arr = args.shift();
+      for(i = 0, l = arr.length; i<l; i++)
+        this.use.apply(this, [arr[i]].concat(args));
+      return this;
+    }else if(is.object(args[0])){
+      //use({ a: fn1, b: fn2, c: fn3 })
+      var obj = args.shift();
+      for(i in obj)
+        this.use.call(this, i, obj[i]);
       return this;
     }
 

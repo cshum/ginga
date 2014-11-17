@@ -30,12 +30,14 @@ clock2.use(function(ctx, next){
   ctx.logs.push('tick2');
   next();
 });
-clock2.use('tick',function(ctx, next){
-  ctx.logs.push('more tick');
-  next();
-});
-clock2.use('tock',function(ctx, next){
-  next('booooom');
+clock2.use({
+  'tick': function(ctx, next){
+    ctx.logs.push('more tick');
+    next();
+  },
+  'tock': function(ctx, next){
+    next('booooom');
+  }
 });
 
 tape('anchor middleware', function (t) {
