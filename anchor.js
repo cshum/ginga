@@ -153,15 +153,11 @@
     scope = scope || {};
 
     this._scope = scope;
-    this._methods = {};
     this._middleware = [];
 
-    var self = this;
-
-    this._scope.use = function(){
+    this._scope.use = this._scope.use || function(){
       var args = Array.prototype.slice.call(arguments);
       //this refers to scope instance
-      //self refers to anchor instance
 
       var name = null, i, l;
 
@@ -184,11 +180,8 @@
         name = args.shift();
 
       //no method name, iterate all methods
-      if(!name){
-        for(name in self._methods)
-          this.use.apply(this, [name].concat(args));
-        return this;
-      }
+      if(!name)
+        throw new Error('Need to specify method name for instance middleware.');
 
       //scope var init
       if(!this._middleware) 
@@ -269,9 +262,6 @@
       if(!_name || _name === name)
         middleware.push(this._middleware[i].fn);
     }
-
-    //define method
-    this._methods[name] = {};
 
     //pipe with local middleware
     var _pipe = [].concat(

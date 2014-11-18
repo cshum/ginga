@@ -26,10 +26,6 @@ anchor(Clock.prototype)
 var clock1 = new Clock();
 var clock2 = new Clock();
 
-clock2.use(function(ctx, next){
-  ctx.logs.push('tick2');
-  next();
-});
 clock2.use({
   'tick': function(ctx, next){
     ctx.logs.push('more tick');
@@ -57,7 +53,7 @@ tape('anchor middleware 2', function (t) {
 tape('instance middleware',function(t){
   clock2.tick(function(err,res){
     t.notOk(err, 'no error');
-    t.deepEqual(res,['clock','tick','tick2','more tick','done']);
+    t.deepEqual(res,['clock','tick','more tick','done']);
     t.end();
   });
 });
