@@ -19,6 +19,9 @@
     'string': function(val){
       return typeof val === 'string';
     },
+    'boolean': function(val){
+      return typeof val === 'boolean';
+    },
     'function': function(val){
       return typeof val === 'function';
     },
@@ -179,7 +182,6 @@
       if(is.string(args[0]))
         name = args.shift();
 
-      //no method name, iterate all methods
       if(!name)
         throw new Error('Need to specify method name for instance middleware.');
 
@@ -305,8 +307,15 @@
         }
         index++;
         if(pipe[index]){
-          //trigger next
-          pipe[index].call(self, ctx, next);
+          //trigger pipe
+          var fn = pipe[index];
+          var len = fn.length;
+          if(len === 2) 
+            fn.call(self, ctx, next);
+          else if(len === 1) 
+            fn.call(self, next);
+          else if(len === 0)
+            throw new Error('Require function callback');
         }else{
           //trigger empty callback if no more pipe
           callback.apply(self);

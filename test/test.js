@@ -31,7 +31,7 @@ clock2.use({
     ctx.logs.push('more tick');
     next();
   },
-  'tock': function(ctx, next){
+  'tock': function(next){
     next('booooom');
   }
 });
