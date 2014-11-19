@@ -314,8 +314,10 @@
             fn.call(self, ctx, next);
           else if(len === 1) 
             fn.call(self, next);
-          else if(len === 0)
-            throw new Error('Require function callback');
+          else if(len === 0){
+            fn.call(self);
+            next(); //no need callback
+          }
         }else{
           //trigger empty callback if no more pipe
           callback.apply(self);
