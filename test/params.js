@@ -1,13 +1,9 @@
 var tape = require('tape');
 var anchor = require('../anchor');
 var params = anchor.params;
-var defaults = anchor.defaults;
 
 var obj = anchor()
-  .use('f1',
-    params('a:string','b:string?','c:function?'), 
-    defaults({ b: 'default'})
-  )
+  .use('f1', params('a:string','b:string?','c:function?') )
   .use('f2', params('a','b:string'))
   .define(['f1','f2'], function(ctx, done){
     return done(null, ctx.params);
@@ -25,7 +21,7 @@ tape('defaults & skip optional',function(t){
   var fn = function(){};
   obj.f1('1',fn, function(err, res){
     t.notOk(err, 'no error');
-    t.deepEqual(res, { a: '1', b: 'default', c: fn });
+    t.deepEqual(res, { a: '1', c: fn });
     t.end();
   });
 });

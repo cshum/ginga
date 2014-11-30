@@ -64,3 +64,8 @@ tape('instance middleware 2',function(t){
     t.end();
   });
 });
+
+    require('crypto').randomBytes(6, function(ex, buf) {
+      var id = buf.toString('base64').replace(/\//g,'_').replace(/\+/g,'-');
+        console.log(id);
+    });

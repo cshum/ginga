@@ -14,7 +14,6 @@
     };
   }
 })('anchor', this, function () {
-
   var is = {
     'string': function(val){
       return typeof val === 'string';
@@ -39,8 +38,8 @@
     }
   };
 
-  function emptyFn(ctx, cb){
-    if(is.function(cb)) cb();
+  function emptyFn(cb){
+    if(is.function(cb)) cb(null, null);
     return true;
   }
 
@@ -83,6 +82,8 @@
       var params = {};
       var index = 0;
       var offset = 0;
+
+      ctx.params = params;
       if(len < min)
         return next(new Error('Too few arguments. Expected at least '+min));
       while(offset < len && index < specLen){
@@ -94,7 +95,7 @@
           if(args[offset] === null || args[offset] === undefined)
             offset++;
           if(index >= specLen || offset >= len)
-            return next(new Error('Missing parameters.'));
+            return next();
         }
         if( !spec[index].check(args[offset]) )
           return next(new Error('Invalid type on argument `'+args[offset]+'`.'));
@@ -102,23 +103,6 @@
         params[spec[index].name] = args[offset];
         index++;
         offset++;
-      }
-      ctx.params = params;
-      next();
-    };
-  }
-
-  //defaults middleware
-  function defaults(){
-    var args = Array.prototype.slice.call(arguments);
-    return function(ctx, next){
-      ctx.params = ctx.params || {};
-      for(var i = 0, l = args.length; i < l; i++){
-        var source = args[i];
-        for(var prop in source){
-          if(ctx.params[prop] === void 0)
-            ctx.params[prop] = source[prop];
-        }
       }
       next();
     };
@@ -158,9 +142,12 @@
     this._scope = scope;
     this._middleware = [];
 
+    var self = this;
+
     this._scope.use = this._scope.use || function(){
       var args = Array.prototype.slice.call(arguments);
       //this refers to scope instance
+      //self refers to driver instance
 
       var name = null, i, l;
 
@@ -274,7 +261,7 @@
     this._scope[name] = function(){
       var args = Array.prototype.slice.call(arguments);
 
-      //this refers to scope instance, not anchor instance
+      //this refers to scope instance, not driver instance
       var self = this;
 
       var callback = emptyFn;
@@ -293,38 +280,37 @@
       //context object and next triggerer
       var ctx = new Context();
       ctx.method = name;
-      ctx.scope = this;
       ctx.args = args;
 
       var index = 0;
+      function trigger(){
+        var fn = pipe[index];
+        var len = fn.length;
+        if(len === 2) 
+          fn.call(self, ctx, next);
+        else if(len === 1) 
+          fn.call(self, next);
+        else if(len === 0){
+          throw new Error('Missing callback function.');
+        }
+      }
       function next(){
         //trigger callback if args exist
         if(arguments.length > 0){
           var args = Array.prototype.slice.call(arguments);
           callback.apply(self, args);
-          ctx.emit('end', args);
           return;
         }
         index++;
         if(pipe[index]){
           //trigger pipe
-          var fn = pipe[index];
-          var len = fn.length;
-          if(len === 2) 
-            fn.call(self, ctx, next);
-          else if(len === 1) 
-            fn.call(self, next);
-          else if(len === 0){
-            fn.call(self);
-            next(); //no need callback
-          }
+          trigger();
         }else{
           //trigger empty callback if no more pipe
           callback.apply(self);
-          ctx.emit('end');
         }
       }
-      pipe[index].call(self, ctx, next);
+      trigger();
 
       return this;
     };
@@ -334,8 +320,8 @@
   Anchor.prototype.scope = function(){
     return this._scope;
   };
+
   Anchor.params = params;
-  Anchor.defaults = defaults;
 
   return Anchor;
 });
