@@ -108,30 +108,6 @@
     };
   }
 
-  //Context constructor
-  function Context(){
-    this._events = {};
-  }
-  Context.prototype.on = function (type, fn){
-    this._events[type] = this._events[type] || [];
-
-    if(is.string(type))
-      throw new Error('event type is not defined');
-    if(is.function(fn))
-      throw new Error('invalid function');
-
-    this._events[type].push(fn);
-    return this;
-  };
-  Context.prototype.emit = function (type, args){
-    if(this._events[type]){
-      var stack = this._events[type];
-      for(var i = 0, l = stack.length; i<l; i++)
-        stack[i].apply(this, args);
-    }
-    return this;
-  };
-
   function use(){
     var args = Array.prototype.slice.call(arguments);
     //this refers to scope instance
