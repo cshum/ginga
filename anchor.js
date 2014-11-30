@@ -132,6 +132,51 @@
     return this;
   };
 
+  function use(){
+    var args = Array.prototype.slice.call(arguments);
+    //this refers to scope instance
+    //self refers to driver instance
+
+    var name = null, i, l;
+
+    if(is.array(args[0])){
+      //use(['a','b','c'], fn)
+      var arr = args.shift();
+      for(i = 0, l = arr.length; i<l; i++)
+        this.use.apply(this, [arr[i]].concat(args));
+      return this;
+    }else if(is.object(args[0])){
+      //use({ a: fn1, b: fn2, c: fn3 })
+      var obj = args.shift();
+      for(i in obj)
+        this.use.call(this, i, obj[i]);
+      return this;
+    }
+
+    //single method name
+    if(is.string(args[0]))
+      name = args.shift();
+
+    if(!name)
+      throw new Error('Need to specify method name for instance middleware.');
+
+    //scope var init
+    if(!this._middleware) 
+      this._middleware = {};
+
+    if(!this._middleware[name]) 
+      this._middleware[name] = [];
+
+    for(i = 0, l = args.length; i<l; i++){
+      if(is.function(args[i]))
+        this._middleware[name].push(args[i]);
+      else
+        throw new Error('invalid function');
+    }
+
+    return this;
+  }
+
   //Anchor constructor
   function Anchor(scope){
     if(!(this instanceof Anchor))
@@ -139,55 +184,10 @@
 
     scope = scope || {};
 
-    this._scope = scope;
     this._middleware = [];
 
-    var self = this;
-
-    this._scope.use = this._scope.use || function(){
-      var args = Array.prototype.slice.call(arguments);
-      //this refers to scope instance
-      //self refers to driver instance
-
-      var name = null, i, l;
-
-      if(is.array(args[0])){
-        //use(['a','b','c'], fn)
-        var arr = args.shift();
-        for(i = 0, l = arr.length; i<l; i++)
-          this.use.apply(this, [arr[i]].concat(args));
-        return this;
-      }else if(is.object(args[0])){
-        //use({ a: fn1, b: fn2, c: fn3 })
-        var obj = args.shift();
-        for(i in obj)
-          this.use.call(this, i, obj[i]);
-        return this;
-      }
-
-      //single method name
-      if(is.string(args[0]))
-        name = args.shift();
-
-      if(!name)
-        throw new Error('Need to specify method name for instance middleware.');
-
-      //scope var init
-      if(!this._middleware) 
-        this._middleware = {};
-
-      if(!this._middleware[name]) 
-        this._middleware[name] = [];
-
-      for(i = 0, l = args.length; i<l; i++){
-        if(is.function(args[i]))
-          this._middleware[name].push(args[i]);
-        else
-          throw new Error('invalid function');
-      }
-
-      return this;
-    };
+    this._scope = scope;
+    this._scope.use = use;
   }
 
   Anchor.prototype.use = function(){
@@ -278,9 +278,10 @@
         );
 
       //context object and next triggerer
-      var ctx = new Context();
-      ctx.method = name;
-      ctx.args = args;
+      var ctx = {
+        method: name,
+        args: args
+      };
 
       var index = 0;
       function trigger(){
