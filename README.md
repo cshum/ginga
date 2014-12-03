@@ -1,6 +1,10 @@
 # Anchor.js
 
-Anchor.js is a JavaScript utility that provides middleware support for scaffolding asynchronous methods.
+Anchor.js enables (express inspired) middleware function attached to Javascript prototype and instance.
+This leverages multi-tier, evented, encapsulated, callback 'nightmare' suppressing architecture
+for scaffolding asynchronous APIs.
+
+Anchor.js also includes `params` middleware that allows optional parameters and type-checking for method arguments.
 
 ## Installation
 
@@ -62,6 +66,12 @@ clock2.tick(console.log.bind(console)); //null ['clock','tick','tick2','done']
 clock2.tock(console.log.bind(console)); //'booooom'
 ```
 #### Changelog
+
+`0.2.1`
+- Clean up unnecessary API methods
+
+`0.2.0`
+- ADD params parser middleware
 
 `0.1.2`
 - Simplify API
