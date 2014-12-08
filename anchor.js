@@ -282,7 +282,9 @@
         //trigger callback if args exist
         if(arguments.length > 0){
           var args = Array.prototype.slice.call(arguments);
-          callback.apply(self, args);
+          for(i = 0, l = callbacks.length; i<l; i++){
+            callbacks[i].apply(self, args);
+          }
           return;
         }
         index++;
@@ -291,7 +293,9 @@
           trigger();
         }else{
           //trigger empty callback if no more pipe
-          callback.apply(self);
+          for(i = 0, l = callbacks.length; i<l; i++){
+            callbacks[i].apply(self);
+          }
         }
       }
       trigger();
