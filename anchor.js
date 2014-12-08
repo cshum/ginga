@@ -258,18 +258,25 @@
         method: name,
         args: args
       };
-
+      var callbacks = [callback];
       var index = 0;
+
       function trigger(){
         var fn = pipe[index];
         var len = fn.length;
-        if(len === 2) 
-          fn.call(self, ctx, next);
+        if(len >= 2) 
+          fn.call(self, ctx, next, onEnd);
         else if(len === 1) 
           fn.call(self, next);
         else if(len === 0){
           throw new Error('Missing callback function.');
         }
+      }
+      function onEnd(fn){
+        if(!fn) return;
+        if(!is.function(fn))
+          throw new Error('end callback must be function');
+        callbacks.push(fn);
       }
       function next(){
         //trigger callback if args exist
