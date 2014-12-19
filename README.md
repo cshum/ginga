@@ -67,6 +67,9 @@ clock2.tock(console.log.bind(console)); //'booooom'
 ```
 #### Changelog
 
+`0.2.2`
+- ADD onEnd callback
+
 `0.2.1`
 - Clean up unnecessary API methods
 
