@@ -78,3 +78,7 @@ clock2.tock(console.log.bind(console)); //'booooom'
 
 `0.1.2`
 - Simplify API
+
+#### Changelog
+
+MIT
