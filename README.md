@@ -1,25 +1,25 @@
-# Anchor.js
+# AnchorJS
 
-Anchor.js enables (express inspired) middleware function attached to Javascript prototype and instance.
-This leverages multi-tier, evented, encapsulated, callback 'nightmare' suppressing architecture
-for scaffolding asynchronous APIs.
+[![Build Status](https://travis-ci.org/cshum/anchorjs.svg?branch=master)](https://travis-ci.org/cshum/anchorjs)
 
-Anchor.js also includes `params` middleware that allows optional parameters and type-checking for method arguments.
+AnchorJS is a (express inspired) middleware layer for scaffolding asynchronous JavaScript methods using prototype or object literal.
 
 ## Installation
 
-#### Node.js
+Node.js
 
 ```bash
 $ npm install anchorjs
 ```
 
-#### Browser
+Browser
 
 Include the Anchor.js browser build in your pages.
+
 ```html
 <script src="anchor.js" type="text/javascript"></script>
 ```
+
 This will provide `anchor` as a global object, or `define` it if you are using AMD.
 
 ##Example
@@ -65,7 +65,7 @@ clock1.tock(console.log.bind(console)); //null ['clock','tick','tock','done']
 clock2.tick(console.log.bind(console)); //null ['clock','tick','tick2','done']
 clock2.tock(console.log.bind(console)); //'booooom'
 ```
-#### Changelog
+## Changelog
 
 `0.2.2`
 - ADD onEnd callback
@@ -79,6 +79,6 @@ clock2.tock(console.log.bind(console)); //'booooom'
 `0.1.2`
 - Simplify API
 
-#### License
+## License
 
 MIT
