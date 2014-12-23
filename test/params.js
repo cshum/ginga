@@ -10,25 +10,20 @@ var obj = anchor()
   })
   .scope();
 
-tape('missing optional',function(t){
+function fn(){}
+
+tape('anchor params',function(t){
+  t.plan(6);
   obj.f1('1','2', function(err, res){
     t.notOk(err, 'no error');
     t.deepEqual(res, { a: '1', b: '2' });
-    t.end();
   });
-});
-tape('defaults & skip optional',function(t){
-  var fn = function(){};
   obj.f1('1',fn, function(err, res){
     t.notOk(err, 'no error');
     t.deepEqual(res, { a: '1', c: fn });
-    t.end();
   });
-});
-tape('error',function(t){
   obj.f2('1', function(err, res){
     t.ok(err, 'error');
     t.notOk(res, 'no result');
-    t.end();
   });
 });

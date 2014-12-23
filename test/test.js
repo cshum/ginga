@@ -21,7 +21,7 @@ anchor(Clock.prototype)
   .define(['tick','tock'],function(ctx, done){
     ctx.logs.push('done');
     done(null, ctx.logs);
-  });
+ });
 
 var clock1 = new Clock();
 var clock2 = new Clock();
@@ -37,35 +37,22 @@ clock2.use({
 });
 
 tape('anchor middleware', function (t) {
+  t.plan(8);
+
   clock1.tick(function(err,res){
     t.notOk(err, 'no error');
     t.deepEqual(res,['clock','tick','done']);
-    t.end();
   });
-});
-tape('anchor middleware 2', function (t) {
   clock1.tock(function(err,res){
     t.notOk(err, 'no error');
     t.deepEqual(res,['clock','tick','tock','done']);
-    t.end();
   });
-});
-tape('instance middleware',function(t){
   clock2.tick(function(err,res){
     t.notOk(err, 'no error');
     t.deepEqual(res,['clock','tick','more tick','done']);
-    t.end();
   });
-});
-tape('instance middleware 2',function(t){
   clock2.tock(function(err,res){
     t.notOk(res, 'no result');
     t.equal(err,'booooom', 'return error');
-    t.end();
   });
 });
-
-    require('crypto').randomBytes(6, function(ex, buf) {
-      var id = buf.toString('base64').replace(/\//g,'_').replace(/\+/g,'-');
-        console.log(id);
-    });
