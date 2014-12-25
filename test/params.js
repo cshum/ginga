@@ -8,7 +8,7 @@ var obj = anchor()
   .define(['f1','f2'], function(ctx, done){
     return done(null, ctx.params);
   })
-  .scope();
+  .scope;
 
 function fn(){}
 

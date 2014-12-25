@@ -2,7 +2,7 @@
 
 [![Build Status](https://travis-ci.org/cshum/anchorjs.svg?branch=master)](https://travis-ci.org/cshum/anchorjs)
 
-AnchorJS is a (express inspired) middleware layer for scaffolding asynchronous JavaScript methods using prototype or object literal.
+AnchorJS is a (express inspired) middleware layer for scaffolding asynchronous JavaScript methods. 
 
 ## Installation
 
@@ -66,6 +66,9 @@ clock2.tick(console.log.bind(console)); //null ['clock','tick','tick2','done']
 clock2.tock(console.log.bind(console)); //'booooom'
 ```
 ## Changelog
+
+`0.2.3`
+- ADD scope
 
 `0.2.2`
 - ADD onEnd callback

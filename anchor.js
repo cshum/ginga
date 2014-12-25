@@ -158,12 +158,10 @@
     if(!(this instanceof Anchor))
       return new Anchor(scope);
 
-    scope = scope || {};
-
     this._middleware = [];
 
-    this._scope = scope;
-    this._scope.use = use;
+    this.scope = scope || {};
+    this.scope.use = use;
   }
 
   Anchor.prototype.use = function(){
@@ -234,7 +232,7 @@
       invoke
     );
     //define scope method
-    this._scope[name] = function(){
+    this.scope[name] = function(){
       var args = Array.prototype.slice.call(arguments);
 
       //this refers to scope instance, not driver instance
@@ -303,10 +301,6 @@
       return this;
     };
     return this;
-  };
-
-  Anchor.prototype.scope = function(){
-    return this._scope;
   };
 
   Anchor.params = params;
