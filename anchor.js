@@ -113,7 +113,7 @@
     //this refers to scope instance
     //self refers to driver instance
 
-    var name = null, i, l;
+    var name = null, i, j, l, m;
 
     if(is.array(args[0])){
       //use(['a','b','c'], fn)
@@ -144,9 +144,14 @@
       this._middleware[name] = [];
 
     for(i = 0, l = args.length; i<l; i++){
-      if(is.function(args[i]))
+      if(is.function(args[i])){
         this._middleware[name].push(args[i]);
-      else
+      }else if(is.array(args[i])){
+        //use('a', [fn1, fn2, fn3])
+        for(j = 0, m = args[i].length; j<m; j++)
+          this.use.call(this, name, args[i][j]);
+        return this;
+      }else
         throw new Error('invalid function');
     }
 
@@ -166,7 +171,7 @@
 
   Anchor.prototype.use = function(){
     var args = Array.prototype.slice.call(arguments);
-    var name = null, i, l;
+    var name = null, i, j, l, m;
 
     if(is.array(args[0])){
       //use(['a','b','c'], fn)
@@ -186,13 +191,19 @@
       name = args.shift();
 
     for(i = 0, l = args.length; i<l; i++){
-      if(is.function(args[i]))
+      if(is.function(args[i])){
         this._middleware.push({
           name: name,
           fn: args[i]
         });
-      else
+      }else if(is.array(args[i])){
+        //use('a', [fn1, fn2, fn3])
+        for(j = 0, m = args[i].length; j<m; j++)
+          this.use.call(this, name, args[i][j]);
+        return this;
+      }else{
         throw new Error('invalid function');
+      }
     }
     return this;
   };

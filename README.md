@@ -67,6 +67,9 @@ clock2.tock(console.log.bind(console)); //'booooom'
 ```
 ## Changelog
 
+`0.2.4`
+- ADD array support for middleware arguments
+
 `0.2.3`
 - ADD scope
 
