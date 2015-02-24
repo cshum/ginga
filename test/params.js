@@ -1,8 +1,8 @@
 var tape = require('tape');
-var anchor = require('../anchor');
-var params = anchor.params;
+var ginga = require('../');
+var params = ginga.params;
 
-var obj = anchor()
+var obj = ginga()
   .use('f1', params('a:string','b:string?','c:function?') )
   .use('f2', params('a','b:string'))
   .define(['f1','f2'], function(ctx, done){
@@ -12,7 +12,7 @@ var obj = anchor()
 
 function fn(){}
 
-tape('anchor params',function(t){
+tape('ginga params',function(t){
   t.plan(6);
   obj.f1('1','2', function(err, res){
     t.notOk(err, 'no error');

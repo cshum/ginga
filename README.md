@@ -1,39 +1,21 @@
-# AnchorJS
-
-[![Build Status](https://travis-ci.org/cshum/anchorjs.svg?branch=master)](https://travis-ci.org/cshum/anchorjs)
-
-AnchorJS is a (express inspired) middleware layer for scaffolding asynchronous JavaScript methods. 
-
-## Installation
-
-Node.js
+# Ginga
 
 ```bash
-$ npm install anchorjs
+$ npm install ginga
 ```
-
-Browser
-
-Include the Anchor.js browser build in your pages.
-
-```html
-<script src="anchor.js" type="text/javascript"></script>
-```
-
-This will provide `anchor` as a global object, or `define` it if you are using AMD.
 
 ##Example
 
 Middleware
 
 ```js
-var anchor = require('anchorjs');
+var ginga = require('ginga');
 
 function Clock(){
   this._tick = 'tick';
   this._tock = 'tock';
 }
-anchor(Clock.prototype)
+ginga(Clock.prototype)
   .use(function(ctx, next){
     ctx.logs = ['clock',this._tick];
     next();
@@ -67,23 +49,6 @@ clock2.tock(console.log.bind(console)); //'booooom'
 ```
 ## Changelog
 
-`0.2.4`
-- ADD array support for middleware arguments
-
-`0.2.3`
-- ADD scope
-
-`0.2.2`
-- ADD onEnd callback
-
-`0.2.1`
-- Clean up unnecessary API methods
-
-`0.2.0`
-- ADD params parser middleware
-
-`0.1.2`
-- Simplify API
 
 ## License
 

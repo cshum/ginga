@@ -1,11 +1,11 @@
 var tape = require('tape');
-var anchor = require('../anchor');
+var ginga = require('../');
 
 function Clock(){
   this._tick = 'tick';
   this._tock = 'tock';
 }
-anchor(Clock.prototype)
+ginga(Clock.prototype)
   .use([
     function(ctx, next){
       ctx.logs = ['clock'];
@@ -44,7 +44,7 @@ clock2.use({
   }
 });
 
-tape('anchor middleware', function (t) {
+tape('ginga middleware', function (t) {
   t.plan(8);
 
   clock1.tick(function(err,res){

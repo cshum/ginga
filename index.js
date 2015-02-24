@@ -13,7 +13,7 @@
       return this;
     };
   }
-})('anchor', this, function () {
+})('ginga', this, function () {
   var is = {
     'string': function(val){
       return typeof val === 'string';
@@ -158,10 +158,10 @@
     return this;
   }
 
-  //Anchor constructor
-  function Anchor(scope){
-    if(!(this instanceof Anchor))
-      return new Anchor(scope);
+  //Ginga constructor
+  function Ginga(scope){
+    if(!(this instanceof Ginga))
+      return new Ginga(scope);
 
     this._middleware = [];
 
@@ -169,7 +169,7 @@
     this.scope.use = use;
   }
 
-  Anchor.prototype.use = function(){
+  Ginga.prototype.use = function(){
     var args = Array.prototype.slice.call(arguments);
     var name = null, i, j, l, m;
 
@@ -208,7 +208,7 @@
     return this;
   };
 
-  Anchor.prototype.define = function(){
+  Ginga.prototype.define = function(){
     var args = Array.prototype.slice.call(arguments);
     var i, l;
 
@@ -314,7 +314,7 @@
     return this;
   };
 
-  Anchor.params = params;
+  Ginga.params = params;
 
-  return Anchor;
+  return Ginga;
 });

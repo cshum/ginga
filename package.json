@@ -1,14 +1,13 @@
 {
-  "name": "anchorjs",
-  "version": "0.2.4",
+  "name": "ginga",
+  "version": "0.0.1",
   "description": "",
-  "main": "anchor.js",
   "scripts": {
     "test": "set -e; for t in test/*.js; do node $t; done"
   },
   "repository": {
     "type": "git",
-    "url": "git@github.com:cshum/anchorjs.git"
+    "url": "git@github.com:cshum/ginga.git"
   },
   "keywords": [
     "api",
