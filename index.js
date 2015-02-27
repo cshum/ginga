@@ -13,7 +13,8 @@
       return this;
     };
   }
-})('ginga', this, function () {
+})('ginga', this, function() {
+
   var is = {
     'string': function(val){
       return typeof val === 'string';
@@ -38,9 +39,13 @@
     }
   };
 
-  function emptyFn(cb){
-    if(is.function(cb)) cb(null, null);
+  function emptyMw(cb){
+    if(is.function(cb)) 
+      cb(null, null);
     return true;
+  }
+  function newObj(){
+    return {};
   }
 
   //params parsing middleware
@@ -72,7 +77,7 @@
           throw new Error('Parameter `'+arg[0]+'`: type `'+arg[1]+'` not exist');
         obj.check = check;
       }else
-        obj.check = emptyFn;
+        obj.check = emptyMw;
       spec.push(obj);
     }
     return function(ctx, next){
@@ -110,22 +115,20 @@
 
   function use(){
     var args = Array.prototype.slice.call(arguments);
-    //this refers to scope instance
-    //self refers to driver instance
 
     var name = null, i, j, l, m;
 
     if(is.array(args[0])){
-      //use(['a','b','c'], fn)
+      //use(['a','b','c'], ...)
       var arr = args.shift();
       for(i = 0, l = arr.length; i<l; i++)
-        this.use.apply(this, [arr[i]].concat(args));
+        use.apply(this, [arr[i]].concat(args));
       return this;
     }else if(is.object(args[0])){
       //use({ a: fn1, b: fn2, c: fn3 })
       var obj = args.shift();
       for(i in obj)
-        this.use.call(this, i, obj[i]);
+        use.call(this, i, obj[i]);
       return this;
     }
 
@@ -133,23 +136,21 @@
     if(is.string(args[0]))
       name = args.shift();
 
-    if(!name)
-      throw new Error('Need to specify method name for instance middleware.');
-
-    //scope var init
-    if(!this._middleware) 
-      this._middleware = {};
-
-    if(!this._middleware[name]) 
-      this._middleware[name] = [];
+    //init hooks
+    if(this._hooks){
+      //prototype instance
+      if(!this.hasOwnProperty('_hooks'))
+        this._hooks = [this._hooks];
+    }else
+      this._hooks = [];
 
     for(i = 0, l = args.length; i<l; i++){
       if(is.function(args[i])){
-        this._middleware[name].push(args[i]);
+        this._hooks.push(args[i]);
       }else if(is.array(args[i])){
         //use('a', [fn1, fn2, fn3])
         for(j = 0, m = args[i].length; j<m; j++)
-          this.use.call(this, name, args[i][j]);
+          use.call(this, name, args[i][j]);
         return this;
       }else
         throw new Error('invalid function');
@@ -158,57 +159,7 @@
     return this;
   }
 
-  //Ginga constructor
-  function Ginga(scope){
-    if(!(this instanceof Ginga))
-      return new Ginga(scope);
-
-    this._middleware = [];
-
-    this.scope = scope || {};
-    this.scope.use = use;
-  }
-
-  Ginga.prototype.use = function(){
-    var args = Array.prototype.slice.call(arguments);
-    var name = null, i, j, l, m;
-
-    if(is.array(args[0])){
-      //use(['a','b','c'], fn)
-      var arr = args.shift();
-      for(i = 0, l = arr.length; i<l; i++)
-        this.use.apply(this, [arr[i]].concat(args));
-      return this;
-    }else if(is.object(args[0])){
-      //use({ a: fn1, b: fn2, c: fn3 })
-      var obj = args.shift();
-      for(i in obj)
-        this.use.call(this, i, obj[i]);
-      return this;
-    }
-
-    if(is.string(args[0]))
-      name = args.shift();
-
-    for(i = 0, l = args.length; i<l; i++){
-      if(is.function(args[i])){
-        this._middleware.push({
-          name: name,
-          fn: args[i]
-        });
-      }else if(is.array(args[i])){
-        //use('a', [fn1, fn2, fn3])
-        for(j = 0, m = args[i].length; j<m; j++)
-          this.use.call(this, name, args[i][j]);
-        return this;
-      }else{
-        throw new Error('invalid function');
-      }
-    }
-    return this;
-  };
-
-  Ginga.prototype.define = function(){
+  function define(){
     var args = Array.prototype.slice.call(arguments);
     var i, l;
 
@@ -216,7 +167,7 @@
     if(is.array(name)) {
       name = args.shift();
       for(i = 0, l = name.length; i<l; i++)
-        this.define.apply(this, [name[i]].concat(args));
+        define.apply(this, [name[i]].concat(args));
       return this;
     }
 
@@ -225,16 +176,16 @@
 
     var invoke = args.pop();
     if (!is.function(invoke))
-      invoke = emptyFn;
+      invoke = emptyMw;
 
-    this.use.apply(this, args);
+    use.apply(this, args);
 
     //filter local middleware
     var middleware = [];
-    for(i = 0, l = this._middleware.length; i<l; i++){
-      var _name = this._middleware[i].name;
+    for(i = 0, l = this._hooks.length; i<l; i++){
+      var _name = this._hooks[i].name;
       if(!_name || _name === name)
-        middleware.push(this._middleware[i].fn);
+        middleware.push(this._hooks[i].fn);
     }
 
     //pipe with local middleware
@@ -243,22 +194,22 @@
       invoke
     );
     //define scope method
-    this.scope[name] = function(){
+    this[name] = function(){
       var args = Array.prototype.slice.call(arguments);
 
       //this refers to scope instance, not driver instance
       var self = this;
 
-      var callback = emptyFn;
+      var callback = emptyMw;
       if (is.function(args[args.length - 1]))
         callback = args.pop();
 
       var pipe = _pipe;
       //pipe scope middleware if exists
-      if(this._middleware && this._middleware[name])
+      if(this._hooks && this._hooks[name])
         pipe = [].concat(
           middleware,
-          this._middleware[name],
+          this._hooks[name],
           invoke
         );
 
@@ -312,8 +263,18 @@
       return this;
     };
     return this;
-  };
+  }
 
+  function Ginga(scope, context){
+    scope = scope || {};
+
+    scope._hooks = [];
+    scope._context = is.function(context) ? context : newObj;
+    scope.use = use;
+    scope.define = define;
+
+    return scope;
+  }
   Ginga.params = params;
 
   return Ginga;
