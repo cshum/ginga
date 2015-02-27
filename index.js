@@ -44,9 +44,6 @@
       cb(null, null);
     return true;
   }
-  function newObj(){
-    return {};
-  }
 
   //params parsing middleware
   function params(){
@@ -265,16 +262,15 @@
     return this;
   }
 
-  function Ginga(scope, context){
+  function Ginga(scope){
     scope = scope || {};
-
-    scope._hooks = [];
-    scope._context = is.function(context) ? context : newObj;
     scope.use = use;
     scope.define = define;
 
     return scope;
   }
+  Ginga.use = use;
+  Ginga.define = define;
   Ginga.params = params;
 
   return Ginga;
