@@ -163,6 +163,34 @@
     return this;
   }
 
+  function getVal(val, path){
+    var i = 0, l = path.length;
+    for(i - 0; i < l; i++){
+      if(i in val)
+        val = val[i];
+      else 
+        return null;
+    }
+    return val;
+  }
+
+  function nextFn(pipe, index){
+    var fn = getVal(pipe, index);
+    while(is.array(fn)){
+      index.push(0);
+      fn = getVal(pipe, index);
+    }
+    while(!fn && index.length > 0){
+      index.pop();
+      fn = getVal(pipe, index);
+    }
+    if(index.length > 0){
+      index[index.length - 1]++;
+      return fn;
+    }else
+      return null;
+  }
+
   function define(){
     var args = Array.prototype.slice.call(arguments);
     var i, l;
