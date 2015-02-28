@@ -208,7 +208,7 @@
 
     var invoke = args.pop();
     if (!is.function(invoke))
-      invoke = emptyMw;
+      invoke = null;
 
     var pre = args;
 
@@ -222,12 +222,11 @@
         callbacks.push(args.pop());
 
       //define pipeline;
-      var pipe;
-      if(this._hooks && this._hooks[name]){
-        pipe = [pre, this._hooks[name], invoke];
-      }else{
-        pipe = [pre, invoke];
-      }
+      var pipe = [pre];
+      if(this._hooks && this._hooks[name])
+        pipe.push(this._hooks[name]);
+      if(invoke)
+        pipe.push(invoke);
 
       //context object and next triggerer
       var ctx = {
@@ -241,10 +240,10 @@
           callbacks.push(fn);
       }
       function next(){
+        var i, l;
         if(arguments.length > 0){
-          var args = Array.prototype.slice.call(arguments);
           for(i = 0, l = callbacks.length; i<l; i++)
-            callbacks[i].apply(self, args);
+            callbacks[i].apply(self, arguments);
           return;
         }
         var fn = nextFn(pipe, index);
