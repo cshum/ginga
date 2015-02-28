@@ -236,44 +236,33 @@
       };
       var index = [0];
 
-      function trigger(){
-        var fn = pipe[index];
-        var len = fn.length;
-        if(len >= 2) 
-          fn.call(self, ctx, next, onEnd);
-        else if(len === 1) 
-          fn.call(self, next);
-        else if(len === 0){
-          throw new Error('Missing callback function.');
-        }
-      }
       function onEnd(fn){
-        if(!fn) return;
-        if(!is.function(fn))
-          throw new Error('end callback must be function');
-        callbacks.push(fn);
+        if(is.function(fn))
+          callbacks.push(fn);
       }
       function next(){
-        //trigger callback if args exist
         if(arguments.length > 0){
           var args = Array.prototype.slice.call(arguments);
-          for(i = 0, l = callbacks.length; i<l; i++){
+          for(i = 0, l = callbacks.length; i<l; i++)
             callbacks[i].apply(self, args);
-          }
           return;
         }
-        index++;
-        if(pipe[index]){
-          //trigger pipe
-          trigger();
+        var fn = nextFn(pipe, index);
+        if(fn){
+          var len = fn.length;
+          if(len >= 2) 
+            fn.call(self, ctx, next, onEnd);
+          else if(len === 1) 
+            fn.call(self, next);
+          else if(len === 0){
+            throw new Error('Missing callback function.');
+          }
         }else{
           //trigger empty callback if no more pipe
-          for(i = 0, l = callbacks.length; i<l; i++){
-            callbacks[i].apply(self);
-          }
+          next(null);
         }
       }
-      trigger();
+      next();
 
       return this;
     };
