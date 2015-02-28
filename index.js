@@ -111,8 +111,20 @@
   }
 
   function use(){
-    var args = Array.prototype.slice.call(arguments);
+    //init hooks
+    if(!this._hooks){
+      this._hooks = {};
+    }else{
+      //prototype instance
+      if(!this.hasOwnProperty('_hooks')){
+        var _hooks = this._hooks;
+        this._hooks = {};
+        for(var _name in _hooks)
+          this._hooks[_name] = [ _hooks[_name] ];
+      }
+    }
 
+    var args = Array.prototype.slice.call(arguments);
     var name = null, i, j, l, m;
 
     if(is.array(args[0])){
@@ -121,36 +133,31 @@
       for(i = 0, l = arr.length; i<l; i++)
         use.apply(this, [arr[i]].concat(args));
       return this;
-    }else if(is.object(args[0])){
-      //use({ a: fn1, b: fn2, c: fn3 })
-      var obj = args.shift();
-      for(i in obj)
-        use.call(this, i, obj[i]);
+    }else if(is.object(args[0]) && args[0]._hooks){
+      //use(ginga)
+      for(var _name in args[0]._hooks)
+        use.call(this, _name, args[0]._hooks[_name]);
       return this;
     }
 
-    //single method name
+    //method name
     if(is.string(args[0]))
       name = args.shift();
-
-    //init hooks
-    if(this._hooks){
-      //prototype instance
-      if(!this.hasOwnProperty('_hooks'))
-        this._hooks = [this._hooks];
-    }else
-      this._hooks = [];
+    if(!name)
+      throw new Error('Method name is not defined.');
+    if(!this._hooks[name])
+      this._hooks[name] = [];
 
     for(i = 0, l = args.length; i<l; i++){
       if(is.function(args[i])){
-        this._hooks.push(args[i]);
+        this._hooks[name].push(args[i]);
       }else if(is.array(args[i])){
         //use('a', [fn1, fn2, fn3])
         for(j = 0, m = args[i].length; j<m; j++)
           use.call(this, name, args[i][j]);
         return this;
       }else
-        throw new Error('invalid function');
+        throw new Error('Middleware must be a function');
     }
 
     return this;
@@ -175,48 +182,31 @@
     if (!is.function(invoke))
       invoke = emptyMw;
 
-    use.apply(this, args);
+    var pre = args;
 
-    //filter local middleware
-    var middleware = [];
-    for(i = 0, l = this._hooks.length; i<l; i++){
-      var _name = this._hooks[i].name;
-      if(!_name || _name === name)
-        middleware.push(this._hooks[i].fn);
-    }
-
-    //pipe with local middleware
-    var _pipe = [].concat(
-      middleware,
-      invoke
-    );
     //define scope method
     this[name] = function(){
       var args = Array.prototype.slice.call(arguments);
-
-      //this refers to scope instance, not driver instance
       var self = this;
 
-      var callback = emptyMw;
+      var callbacks = [];
       if (is.function(args[args.length - 1]))
-        callback = args.pop();
+        callbacks.push(args.pop());
 
-      var pipe = _pipe;
-      //pipe scope middleware if exists
-      if(this._hooks && this._hooks[name])
-        pipe = [].concat(
-          middleware,
-          this._hooks[name],
-          invoke
-        );
+      //define pipeline;
+      var pipe;
+      if(this._hooks && this._hooks[name]){
+        pipe = [pre, this._hooks[name], invoke];
+      }else{
+        pipe = [pre, invoke];
+      }
 
       //context object and next triggerer
       var ctx = {
         method: name,
         args: args
       };
-      var callbacks = [callback];
-      var index = 0;
+      var index = [0];
 
       function trigger(){
         var fn = pipe[index];
