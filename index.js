@@ -39,9 +39,7 @@
     }
   };
 
-  function emptyMw(cb){
-    if(is.function(cb)) 
-      cb(null, null);
+  function dummy(){
     return true;
   }
 
@@ -74,7 +72,7 @@
           throw new Error('Parameter `'+arg[0]+'`: type `'+arg[1]+'` not exist');
         obj.check = check;
       }else
-        obj.check = emptyMw;
+        obj.check = dummy;
       spec.push(obj);
     }
     return function(ctx, next){
@@ -110,6 +108,7 @@
     };
   }
 
+  //ginga use method
   function use(){
     //init hooks
     if(!this._hooks){
@@ -163,6 +162,7 @@
     return this;
   }
 
+  //util: flatten array
   function flatten(arr, res){
     if(!res){
       res = [];
@@ -177,6 +177,7 @@
     return res;
   }
 
+  //ginga define method
   function define(){
     var args = Array.prototype.slice.call(arguments);
     var i, l;
