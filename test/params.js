@@ -2,13 +2,12 @@ var tape = require('tape');
 var ginga = require('../');
 var params = ginga.params;
 
+function invoke(ctx, done){
+  return done(null, ctx.params);
+}
 var obj = ginga()
-  .use('f1', params('a:string','b:string?','c:function?') )
-  .use('f2', params('a','b:string'))
-  .define(['f1','f2'], function(ctx, done){
-    return done(null, ctx.params);
-  })
-  .scope;
+  .define('f1', params('a:string','b:string?','c:function?'), invoke)
+  .define('f2', params('a','b:string'), invoke);
 
 function fn(){}
 

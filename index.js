@@ -163,39 +163,25 @@
     return this;
   }
 
-  function getVal(val, path){
-    var i = 0, l = path.length;
-    for(i - 0; i < l; i++){
-      if(i in val)
-        val = val[i];
-      else 
-        return null;
+  function flatten(arr, res){
+    if(!res){
+      res = [];
     }
-    return val;
-  }
-
-  function nextFn(pipe, index){
-    var fn = getVal(pipe, index);
-    while(is.array(fn)){
-      index.push(0);
-      fn = getVal(pipe, index);
+    for(var i = 0, l = arr.length; i < l; i++){
+      if(arr[i] && arr[i].constructor == Array){
+        flatten(arr[i], res);
+      }else{
+        res.push(arr[i]);
+      }
     }
-    while(!fn && index.length > 0){
-      index.pop();
-      fn = getVal(pipe, index);
-    }
-    if(index.length > 0){
-      index[index.length - 1]++;
-      return fn;
-    }else
-      return null;
+    return res;
   }
 
   function define(){
     var args = Array.prototype.slice.call(arguments);
     var i, l;
 
-    var name = args[0];
+    var name = args.shift();
     if(is.array(name)) {
       name = args.shift();
       for(i = 0, l = name.length; i<l; i++)
@@ -228,27 +214,31 @@
       if(invoke)
         pipe.push(invoke);
 
+      pipe = flatten(pipe);
+
       //context object and next triggerer
       var ctx = {
         method: name,
         args: args
       };
-      var index = [0];
+      var index = 0;
+      var size = pipe.length;
 
       function onEnd(fn){
         if(is.function(fn))
           callbacks.push(fn);
       }
       function next(){
-        var i, l;
         if(arguments.length > 0){
-          for(i = 0, l = callbacks.length; i<l; i++)
+          for(var i = 0, l = callbacks.length; i<l; i++)
             callbacks[i].apply(self, arguments);
           return;
         }
-        var fn = nextFn(pipe, index);
-        if(fn){
+        if(index < size){
+          var fn = pipe[index];
           var len = fn.length;
+          index++;
+
           if(len >= 2) 
             fn.call(self, ctx, next, onEnd);
           else if(len === 1) 
