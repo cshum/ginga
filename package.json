@@ -1,7 +1,7 @@
 {
   "name": "ginga",
-  "version": "0.0.1",
-  "description": "",
+  "version": "0.1.0",
+  "description": "Ginga modularises asynchronous control flow of Javascript functions.",
   "scripts": {
     "test": "set -e; for t in test/*.js; do node $t; done"
   },
