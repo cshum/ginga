@@ -47,7 +47,7 @@ clock2.use(
   }
 );
 
-tape('ginga middleware', function (t) {
+tape('ginga prototype', function (t) {
   t.plan(8);
 
   clock1.tick(function(err,res){
