@@ -39,16 +39,16 @@ var plugin = ginga()
       next();
     }
   )
-  .use(
-    'tock',
-    function(ctx, next){
-      next('booooom');
-    }
-  );
+  .use('tock',function(ctx, next){
+    next('booooom');
+  })
+  .define('doom', function(ctx, next){
+    next('dooooom');
+  });
 
 
 tape('ginga plugin', function (t) {
-  t.plan(8);
+  t.plan(10);
 
   var clock = new Clock();
 
@@ -70,5 +70,9 @@ tape('ginga plugin', function (t) {
   clock.tock(function(err,res){
     t.notOk(res, 'no result');
     t.equal(err,'booooom', 'return error');
+  });
+  clock.doom(function(err, res){
+    t.notOk(res, 'no result');
+    t.equal(err,'dooooom', 'return error');
   });
 });
