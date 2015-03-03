@@ -134,8 +134,14 @@
       return this;
     }else if(is.object(args[0]) && args[0]._hooks){
       //use(ginga)
-      for(var _name in args[0]._hooks)
-        use.call(this, _name, args[0]._hooks[_name]);
+      var key;
+      //concat hooks
+      for(key in args[0]._hooks)
+        use.call(this, key, args[0]._hooks[key]);
+      //function mixin
+      for(key in args[0])
+        if(is.function(args[0][key]) && !(key in this))
+          this[key] = args[0][key];
       return this;
     }
 
