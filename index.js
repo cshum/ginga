@@ -246,13 +246,7 @@
           var len = fn.length;
           index++;
 
-          if(len >= 2) 
-            fn.call(self, ctx, next, onEnd);
-          else if(len === 1) 
-            fn.call(self, next);
-          else if(len === 0){
-            throw new Error('Missing callback function.');
-          }
+          fn.call(self, ctx, next, onEnd);
         }else{
           //trigger empty callback if no more pipe
           next(null);
