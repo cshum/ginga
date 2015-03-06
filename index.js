@@ -15,6 +15,7 @@
   }
 })('ginga', this, function() {
 
+  //util: type checking
   var is = {
     'string': function(val){
       return typeof val === 'string';
@@ -31,16 +32,32 @@
     'object': function(val){
       return typeof val === 'object' && !!val;
     },
-    'array': function(val){
-      if(Array.isArray)
-        return Array.isArray(val);
-      else
-        return Object.prototype.call(val) === '[object Array]';
+    'array': Array.isArray || function(val){
+      return Object.prototype.toString.call(val) === '[object Array]';
     }
+  };
+
+  var prototypeOf = Object.getPrototypeOf || function(obj){
+    return obj.__proto__;
   };
 
   function dummy(){
     return true;
+  }
+
+  //util: flatten array
+  function flatten(arr, res){
+    if(!res){
+      res = [];
+    }
+    for(var i = 0, l = arr.length; i < l; i++){
+      if(arr[i] && is.array(arr[i])){
+        flatten(arr[i], res);
+      }else{
+        res.push(arr[i]);
+      }
+    }
+    return res;
   }
 
   //params parsing middleware
@@ -111,16 +128,8 @@
   //ginga use method
   function use(){
     //init hooks
-    if(!this._hooks){
+    if(!this.hasOwnProperty('_hooks')){
       this._hooks = {};
-    }else{
-      //prototype instance
-      if(!this.hasOwnProperty('_hooks')){
-        var _hooks = this._hooks;
-        this._hooks = {};
-        for(var _name in _hooks)
-          this._hooks[_name] = [ _hooks[_name] ];
-      }
     }
 
     var args = Array.prototype.slice.call(arguments);
@@ -168,21 +177,6 @@
     return this;
   }
 
-  //util: flatten array
-  function flatten(arr, res){
-    if(!res){
-      res = [];
-    }
-    for(var i = 0, l = arr.length; i < l; i++){
-      if(arr[i] && arr[i].constructor == Array){
-        flatten(arr[i], res);
-      }else{
-        res.push(arr[i]);
-      }
-    }
-    return res;
-  }
-
   //ginga define method
   function define(){
     var args = Array.prototype.slice.call(arguments);
@@ -216,6 +210,10 @@
 
       //define pipeline;
       var pipe = [pre];
+      var proto = prototypeOf(this);
+
+      if(proto._hooks && proto._hooks[name])
+        pipe.push(proto._hooks[name]);
       if(this._hooks && this._hooks[name])
         pipe.push(this._hooks[name]);
       if(invoke)

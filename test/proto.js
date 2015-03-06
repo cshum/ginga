@@ -22,9 +22,7 @@ function end(ctx, done){
   ctx.logs.push('done');
   done(null, ctx.logs);
 }
-ginga(Clock.prototype)
-  .define('tick', base, tick, end)
-  .define('tock', base, tick, tock, end);
+var C = ginga(Clock.prototype);
 
 var clock1 = new Clock();
 var clock2 = new Clock();
@@ -46,6 +44,11 @@ clock2.use(
     next('booooom');
   }
 );
+
+C.define('tick', end);
+C.define('tock', end);
+C.use('tick', base, tick);
+C.use('tock', base, tick, tock);
 
 tape('ginga prototype', function (t) {
   t.plan(8);
