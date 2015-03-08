@@ -204,14 +204,21 @@
       if (is.function(args[args.length - 1]))
         callbacks.push(args.pop());
 
-      //define pipeline;
-      var pipe = [pre];
-      var proto = prototypeOf(this);
+      //init pipeline;
+      var pipe = [];
+      var obj = this;
 
-      if(proto._hooks && proto._hooks[name])
-        pipe.push(proto._hooks[name]);
-      if(this._hooks && this._hooks[name])
-        pipe.push(this._hooks[name]);
+      //prototype chain
+      while(obj && obj._hooks){
+        var hooks = obj._hooks[name];
+        if(hooks)
+          pipe.unshift(hooks);
+        obj = prototypeOf(obj);
+      }
+      //pre middlewares
+      pipe.unshift(pre);
+
+      //invoke middleware
       if(invoke)
         pipe.push(invoke);
 
