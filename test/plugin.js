@@ -45,7 +45,7 @@ var plugin = ginga()
 
 
 tape('ginga plugin', function (t) {
-  t.plan(10);
+  t.plan(8);
 
   var clock = new Clock();
 
