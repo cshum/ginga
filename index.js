@@ -147,10 +147,6 @@
       //concat hooks
       for(key in args[0]._hooks)
         use.call(this, key, args[0]._hooks[key]);
-      //function mixin
-      for(key in args[0])
-        if(is.function(args[0][key]) && !(key in this))
-          this[key] = args[0][key];
       return this;
     }
 
