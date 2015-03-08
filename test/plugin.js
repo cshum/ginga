@@ -41,9 +41,6 @@ var plugin = ginga()
   )
   .use('tock',function(ctx, next){
     next('booooom');
-  })
-  .define('doom', function(ctx, next){
-    next('dooooom');
   });
 
 
@@ -70,9 +67,5 @@ tape('ginga plugin', function (t) {
   clock.tock(function(err,res){
     t.notOk(res, 'no result');
     t.equal(err,'booooom', 'return error');
-  });
-  clock.doom(function(err, res){
-    t.notOk(res, 'no result');
-    t.equal(err,'dooooom', 'return error');
   });
 });
