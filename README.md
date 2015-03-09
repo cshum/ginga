@@ -1,6 +1,8 @@
 # Ginga.js
 
-Ginga is a utility module that enables modular, middleware based (express inspired), 'callback hell' suppressing architecture for creating asynchronous JavaScript methods.
+Ginga is a utility module that enables a middleware based, modular architecture for creating asynchronous JavaScript methods.
+
+[![Build Status](https://travis-ci.org/cshum/ginga.svg?branch=master)](https://travis-ci.org/cshum/ginga)
 
 ```bash
 $ npm install ginga
@@ -26,17 +28,33 @@ A Middleware that enables optional parameters and type-checking for your method.
 
 Middleware can be attached via defining the method `app.define()` or adding a hook `app.use()`.
 
+####app.define(name, [pre, ...], invoke)
+####app.use(name, [hook, ...])
+
 ```js
 var ginga = require('ginga');
 var app = ginga();
 
-//defining methods
-app.define('save', function(ctx, next){
+//defining method
+app.define('test', function(ctx, next){
+  ctx.logs = ['pre'];
+  next();
+}, function(ctx, next){
+  ctx.logs.push('invoke')
+  done(null, ctx.logs);
+});
 
+//hook
+app.use('test', function(ctx, next){
+  ctx.logs.push('hook')
+  next();
+});
+
+//call method
+app.test(function(err, res){
+  console.log(res); //['pre', 'hooks', 'invoke']
 });
 ```
-####app.define(name, [pre, ...], invoke)
-####app.use(name, [hook, ...])
 
 ###Middleware
 
@@ -46,16 +64,13 @@ Upon calling a Ginga method, it goes through a sequence of functions `middleware
 * `onEnd` - event emitter on callback, invoke with `onEnd(function(err, res){ ... })`
 
 The context object `ctx` maintains state throughout the method call, while encapsulated from `this` object.
-By default, `ctx` contains the following values: 
-* `ctx.method` - method name
-* `ctx.args` - method arguments in form of Array. 
 
 A middleware can make changes to context object, or access changes made by previous middlewares.
 
 Current middleware must call `next()` to pass control to the next middleware, or `next(err, result)` to end the sequence and callback with an error or result.
 Otherwise the method will be left hanging.
 
-####ginga.params([defintion, ...])
+####params([defintion, ...])
 Middleware for parsing method arguments with optional parameters and type-checking:
 ```js
 var ginga = require('ginga');
@@ -63,10 +78,12 @@ var params = ginga.params;
 
 var app = ginga();
 
-app.define('test' params('a:string','b:number?','c:string?'), function(ctx, done){
+//define method with params parsing
+app.define('test', params('a:string','b:number?','c:string?'), function(ctx, done){
   done(null, ctx.params); 
 });
 
+//call method
 app.test('s',1,function(err, res){
   console.log(res); //{"a":"s", "b":1}
 });
@@ -80,7 +97,41 @@ app.test(function(err, res){
 
 ###Plugin
 
-###Prototype Chain
+####app.use(plugin)
+
+###Inheritance
+Ginga allows inheritance via prototype chain. 
+
+```js
+function App(){}
+var A = ginga(App.prototype);
+
+A.define('test', function(ctx, next){
+  ctx.logs = ['pre'];
+  next();
+}, function(ctx, done){
+  ctx.logs.push('invoke');
+  done(null, ctx.logs);
+});
+
+var a1 = new App();
+var a2 = new App();
+
+A.use('test', function(){
+  ctx.logs.push('A hook')
+  next();
+});
+
+a1.use('test', function(){
+  ctx.logs.push('a1 hook')
+  next();
+});
+a2.use('test', function(){
+  ctx.logs.push('a2 hook')
+  next();
+});
+
+```
 
 
 ## License
