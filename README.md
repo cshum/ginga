@@ -96,6 +96,34 @@ app.test(function(err, res){
 ```
 
 ###Plugin
+```js
+var ginga = require('ginga');
+
+//define app
+var app = ginga(); 
+app.define('test', function(ctx, next){
+  ctx.logs = ['pre'];
+  next();
+}, function(ctx, done){
+  ctx.logs.push('invoke');
+  done(null, ctx.logs);
+});
+
+//define plugin
+var plugin = ginga();
+plugin.use('test', function(ctx, next){
+  ctx.logs.push('plugin');
+  next();
+});
+
+//use plugin
+app.use(plugin);
+
+//call methods
+app.test(function(err, res){
+  console.log(res); //['pre','plugin', 'invoke']
+});
+```
 
 ####app.use(plugin)
 
