@@ -103,8 +103,10 @@ app.test(function(err, res){
 Ginga allows inheritance via prototype chain. 
 
 ```js
+var ginga = require('ginga');
+
 function App(){}
-var A = ginga(App.prototype);
+var A = ginga(App.prototype); //ginga prototype mixin
 
 A.define('test', function(ctx, next){
   ctx.logs = ['pre'];
@@ -117,18 +119,28 @@ A.define('test', function(ctx, next){
 var a1 = new App();
 var a2 = new App();
 
-A.use('test', function(){
-  ctx.logs.push('A hook')
+//prototype hook
+A.use('test', function(ctx, next){
+  ctx.logs.push('A hook');
   next();
 });
 
-a1.use('test', function(){
-  ctx.logs.push('a1 hook')
+//instance hook
+a1.use('test', function(ctx, next){
+  ctx.logs.push('a1 hook');
   next();
 });
-a2.use('test', function(){
-  ctx.logs.push('a2 hook')
+a2.use('test', function(ctx, next){
+  ctx.logs.push('a2 hook');
   next();
+});
+
+//call methods
+a1.test(function(err, res){
+  console.log(res); //['pre','A hook','a1 hook', 'invoke']
+});
+a2.test(function(err, res){
+  console.log(res); //['pre','A hook','a2 hook', 'invoke']
 });
 
 ```
