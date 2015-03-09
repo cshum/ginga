@@ -5,32 +5,38 @@ Ginga is a utility module that enables modular, middleware based (express inspir
 ```bash
 $ npm install ginga
 ```
-[TOC]
 
 ####ginga([object])
 Initiate `ginga`
 
-As a new object:
 ```js
 var ginga = require('ginga');
-var app = ginga();
-```
+var obj = ginga(); //as a new object
 
-As a mixin:
-```js
-var ginga = require('ginga');
 var app = {};
-ginga(app);
-```
+ginga(app); //as a mixin
 
-As a prototype mixin:
-```js
-var ginga = require('ginga');
 function App(){ }
-ginga(App.prototype); 
+ginga(App.prototype); //as a prototype mixin:
 ```
 
 A Middleware that enables optional parameters and type-checking for your method.
+
+###Method and Hook
+
+Middleware can be attached via defining the method `app.define()` or adding a hook `app.use()`.
+
+```js
+var ginga = require('ginga');
+var app = ginga();
+
+//defining methods
+app.define('save', function(ctx, next){
+
+});
+```
+####app.define(name, [pre, ...], invoke)
+####app.use(name, [hook, ...])
 
 ###Middleware
 
@@ -55,10 +61,11 @@ Middleware for parsing method arguments with optional parameters and type-checki
 var ginga = require('ginga');
 var params = ginga.params;
 
-var app = ginga()
-  .define('test' params('a:string','b:number?','c:string?'), function(ctx, done){
-    done(null, ctx.params); 
-  });
+var app = ginga();
+
+app.define('test' params('a:string','b:number?','c:string?'), function(ctx, done){
+  done(null, ctx.params); 
+});
 
 app.test('s',1,function(err, res){
   console.log(res); //{"a":"s", "b":1}
@@ -70,19 +77,6 @@ app.test(function(err, res){
   console.log(err); //Error: Too few arguments. Expected at least 1
 });
 ```
-
-###Method and Hook
-
-Middleware can be attached via defining the method `app.define()` or adding a hook `app.use()`.
-
-    var app = ginga();
-
-    //defining methods
-    app.define('save', function(ctx, next){
-
-    });
-####app.define(name, [pre, ...], invoke)
-####app.use(name, [hook, ...])
 
 ###Plugin
 
