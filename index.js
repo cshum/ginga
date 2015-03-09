@@ -29,6 +29,12 @@
     'number': function(val){
       return typeof val === 'number';
     },
+    'date': function(val){
+      return Object.prototype.toString.call(val) === '[object Date]';
+    },
+    'regexp': function(val){
+      return Object.prototype.toString.call(val) === '[object RegExp]';
+    },
     'object': function(val){
       return typeof val === 'object' && !!val;
     },
@@ -84,7 +90,7 @@
       obj.name = arg[0];
       if(arg.length > 1){
         //defined type
-        var check = is[arg[1]];
+        var check = is[arg[1].toLowerCase()];
         if(typeof check !== 'function')
           throw new Error('Parameter `'+arg[0]+'`: type `'+arg[1]+'` not exist');
         obj.check = check;
