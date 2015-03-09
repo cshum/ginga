@@ -1,14 +1,35 @@
-# Ginga
+# Ginga.js
 
-Ginga is a JavaScript library that enable modular control flow of asynchronous Javascript methods.
+Ginga is a utility module that enables modular, middleware based (express inspired), 'callback hell' suppressing architecture for creating asynchronous JavaScript methods.
 
 ```bash
 $ npm install ginga
 ```
-###ginga()
-###app.define()
-###app.use()
-###ginga.params()
+[TOC]
+
+####ginga([object])
+Initiate `ginga`
+
+As a new object:
+```js
+var ginga = require('ginga');
+var app = ginga();
+```
+
+As a mixin:
+```js
+var ginga = require('ginga');
+var app = {};
+ginga(app);
+```
+
+As a prototype mixin:
+```js
+var ginga = require('ginga');
+function App(){ }
+ginga(App.prototype); 
+```
+
 A Middleware that enables optional parameters and type-checking for your method.
 
 ###Middleware
@@ -28,6 +49,28 @@ A middleware can make changes to context object, or access changes made by previ
 Current middleware must call `next()` to pass control to the next middleware, or `next(err, result)` to end the sequence and callback with an error or result.
 Otherwise the method will be left hanging.
 
+####ginga.params([defintion, ...])
+Middleware for parsing method arguments with optional parameters and type-checking:
+```js
+var ginga = require('ginga');
+var params = ginga.params;
+
+var app = ginga()
+  .define('test' params('a:string','b:number?','c:string?'), function(ctx, done){
+    done(null, ctx.params); 
+  });
+
+app.test('s',1,function(err, res){
+  console.log(res); //{"a":"s", "b":1}
+});
+app.test('s','t',function(err, res){
+  console.log(res); //{"a":"s", "c":"t"}
+});
+app.test(function(err, res){
+  console.log(err); //Error: Too few arguments. Expected at least 1
+});
+```
+
 ###Method and Hook
 
 Middleware can be attached via defining the method `app.define()` or adding a hook `app.use()`.
@@ -38,10 +81,12 @@ Middleware can be attached via defining the method `app.define()` or adding a ho
     app.define('save', function(ctx, next){
 
     });
+####app.define(name, [pre, ...], invoke)
+####app.use(name, [hook, ...])
 
 ###Plugin
 
-###Prototype
+###Prototype Chain
 
 
 ## License
