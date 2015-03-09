@@ -39,14 +39,14 @@ var app = ginga();
 app.define('test', function(ctx, next){
   ctx.logs = ['pre'];
   next();
-}, function(ctx, next){
-  ctx.logs.push('invoke')
+}, function(ctx, done){
+  ctx.logs.push('invoke');
   done(null, ctx.logs);
 });
 
 //hook
 app.use('test', function(ctx, next){
-  ctx.logs.push('hook')
+  ctx.logs.push('hook');
   next();
 });
 
