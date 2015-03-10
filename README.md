@@ -1,6 +1,8 @@
 # Ginga.js
 
-Ginga is a utility module that enables a middleware based, modular architecture for creating asynchronous JavaScript methods.
+Ginga is a utility module that enables a middleware based (express inspired), modular architecture for creating asynchronous JavaScript methods.
+
+This has been thoroughly used in several of my Node.js projects. While it works, may not be in the best optimised form. Any feedback would be appreciated :).
 
 [![Build Status](https://travis-ci.org/cshum/ginga.svg?branch=master)](https://travis-ci.org/cshum/ginga)
 
@@ -9,7 +11,7 @@ $ npm install ginga
 ```
 
 ####ginga([object])
-Initiate `ginga`
+Initialise `ginga`
 
 ```js
 var ginga = require('ginga');
@@ -26,10 +28,12 @@ A Middleware that enables optional parameters and type-checking for your method.
 
 ###Method and Hook
 
-Middleware can be attached via defining the method `app.define()` or adding a hook `app.use()`.
+`define` and `use` a method with `pre`, `hook`, `invoke` middlewares.
+`pre` middlewares initiate and batch operations where `invoke` commits the result. 
+In addition several `hook` can be mounted for additional validations or amendments.
 
-####app.define(name, [pre, ...], invoke)
-####app.use(name, [hook, ...])
+####app.define(name, [pre...], invoke)
+####app.use(name, [hook...])
 
 ```js
 var ginga = require('ginga');
@@ -52,13 +56,13 @@ app.use('test', function(ctx, next){
 
 //call method
 app.test(function(err, res){
-  console.log(res); //['pre', 'hooks', 'invoke']
+  console.log(res); //['pre', 'hook', 'invoke']
 });
 ```
 
 ###Middleware
 
-Upon calling a Ginga method, it goes through a sequence of functions `middleware`. A middleware consists of arguments: 
+Upon calling a method, Ginga goes through a sequence of functions `middleware`. A middleware consists of arguments: 
 * `ctx` - context object, shared across middlewares
 * `next` - callback function, invoke with `next()` or `next(err, result)` 
 * `onEnd` - event emitter on callback, invoke with `onEnd(function(err, res){ ... })`
@@ -67,11 +71,20 @@ The context object `ctx` maintains state throughout the method call, while encap
 
 A middleware can make changes to context object, or access changes made by previous middlewares.
 
-Current middleware must call `next()` to pass control to the next middleware, or `next(err, result)` to end the sequence and callback with an error or result.
+Current middleware must call `next()` to pass control to the next middleware, or `next(err, result)` to end the sequence and callback with error and result.
 Otherwise the method will be left hanging.
 
-####params([defintion, ...])
-Middleware for parsing method arguments with optional parameters and type-checking:
+####ginga.params([param...])
+
+Ginga built in `params` middleware for parsing method arguments with optional parameters and type-checking, 
+`param` is a string in form 
+
+`name[:type][?]`
+
+* `name` - name of the argument mapping into
+* `type` (optional) - explicit type of the argument: `string`, `boolean`, `function`, `number`, `date`, `regexp`, `object`, `array`, case insensitive.
+* `?` - optional parameter.
+
 ```js
 var ginga = require('ginga');
 var params = ginga.params;
@@ -96,6 +109,9 @@ app.test(function(err, res){
 ```
 
 ###Plugin
+
+####app.use(plugin)
+
 ```js
 var ginga = require('ginga');
 
@@ -124,8 +140,6 @@ app.test(function(err, res){
   console.log(res); //['pre','plugin', 'invoke']
 });
 ```
-
-####app.use(plugin)
 
 ###Inheritance
 Ginga allows inheritance via prototype chain. 
