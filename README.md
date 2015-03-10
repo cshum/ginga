@@ -2,7 +2,7 @@
 
 Ginga is a utility module that enables a middleware based (express inspired), modular architecture for creating asynchronous JavaScript methods.
 
-This has been thoroughly used in several of my Node.js projects. While it works, may not be in the best optimised form. Any feedback would be appreciated :).
+This has been thoroughly used in several of my Node.js projects. While it works, may not be in the best optimised form. Any feedback would be greatly appreciated.
 
 [![Build Status](https://travis-ci.org/cshum/ginga.svg?branch=master)](https://travis-ci.org/cshum/ginga)
 
@@ -24,11 +24,9 @@ function App(){ }
 ginga(App.prototype); //as a prototype mixin:
 ```
 
-A Middleware that enables optional parameters and type-checking for your method.
-
 ###Method and Hook
 
-`define` and `use` a method with `pre`, `hook`, `invoke` middleware functions.
+`define()` and `use()` a method with `pre`, `hook`, `invoke` middleware functions.
 `pre` middleware functions initiate and batch operations where `invoke` commits the result. 
 In addition several `hook` can be mounted for additional validations or amendments.
 
@@ -112,7 +110,7 @@ app.test(function(err, res){
 
 ####app.use(plugin)
 
-`app.use` also accepts Ginga object as a 'plugin'. This will mount hooks into the main app.
+`app.use` also accepts Ginga object as plugin. This will mount hooks into the main app.
 
 ```js
 var ginga = require('ginga');
