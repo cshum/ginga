@@ -76,13 +76,13 @@ Otherwise the method will be left hanging.
 
 ####ginga.params([param...])
 
-Ginga built in `params` middleware for parsing method arguments with optional parameters and type-checking, 
+Ginga built in `ginga.params` middleware for parsing method arguments. Supports optional parameters and type-checking.
 `param` is a string in form 
 
 `name[:type][?]`
 
 * `name` - name of the argument mapping into
-* `type` (optional) - explicit type of the argument: `string`, `boolean`, `function`, `number`, `date`, `regexp`, `object`, `array`, case insensitive.
+* `type` type checking (optional): `string`, `boolean`, `function`, `number`, `date`, `regexp`, `object`, `array`, case insensitive.
 * `?` - optional parameter.
 
 ```js
@@ -111,6 +111,8 @@ app.test(function(err, res){
 ###Plugin
 
 ####app.use(plugin)
+
+`app.use` also accepts Ginga object as a 'plugin'. This will mount hooks into the main app.
 
 ```js
 var ginga = require('ginga');
@@ -142,7 +144,7 @@ app.test(function(err, res){
 ```
 
 ###Inheritance
-Ginga allows inheritance via prototype chain. 
+By initialising Ginga with prototype mixin, hooks are also inherited in prototype chain:
 
 ```js
 var ginga = require('ginga');
