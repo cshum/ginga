@@ -237,15 +237,19 @@
       };
       var index = 0;
       var size = pipe.length;
+      var cbArgs = null;
 
-      function onEnd(fn){
-        if(is.function(fn))
+      function end(fn){
+        if(cbArgs)
+          fn.apply(self, cbArgs);
+        else if(is.function(fn))
           callbacks.push(fn);
       }
       function next(){
         if(arguments.length > 0){
           for(var i = 0, l = callbacks.length; i<l; i++)
             callbacks[i].apply(self, arguments);
+          cbArgs = Array.prototype.slice.call(arguments);
           return;
         }
         if(index < size){
@@ -253,7 +257,7 @@
           var len = fn.length;
           index++;
 
-          fn.call(self, ctx, next, onEnd);
+          fn.call(self, ctx, next, end);
         }else{
           //trigger empty callback if no more pipe
           next(null);

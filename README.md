@@ -63,7 +63,7 @@ app.test(function(err, res){
 Upon calling a method, Ginga goes through a sequence of functions `middleware`. A middleware consists of arguments: 
 * `ctx` - context object, shared across middleware functions
 * `next` - callback function, invoke with `next()` or `next(err, result)` 
-* `onEnd` - event emitter on callback, invoke with `onEnd(function(err, res){ ... })`
+* `end` - event emitter on callback, invoke with `end(function(err, res){ ... })`
 
 The context object `ctx` maintains state throughout the method call, while encapsulated from `this` object.
 
