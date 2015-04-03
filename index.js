@@ -215,10 +215,9 @@
       var obj = this;
 
       //prototype chain
-      while(obj && obj._hooks){
-        var hooks = obj._hooks[name];
-        if(hooks)
-          pipe.unshift(hooks);
+      while(obj){
+        if(obj.hasOwnProperty('_hooks') && obj._hooks[name])
+          pipe.unshift(obj._hooks[name]);
         obj = prototypeOf(obj);
       }
       //pre middlewares
