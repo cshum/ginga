@@ -2,8 +2,6 @@
 
 Ginga is a utility module that enables a middleware based (express inspired), modular architecture for creating asynchronous JavaScript methods.
 
-This has been thoroughly used in several of my Node.js projects. While it works, may not be in the best optimised form. Any feedback would be greatly appreciated.
-
 [![Build Status](https://travis-ci.org/cshum/ginga.svg?branch=master)](https://travis-ci.org/cshum/ginga)
 
 ```bash
@@ -59,6 +57,8 @@ app.test(function(err, res){
 ```
 
 ###Middleware
+
+Middleware turns asynchronous function into encapsulated, reusable set of building blocks. 
 
 Upon calling a method, Ginga goes through a sequence of functions `middleware`. A middleware consists of arguments: 
 * `ctx` - context object, shared across middleware functions
