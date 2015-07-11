@@ -1,6 +1,6 @@
 {
   "name": "ginga",
-  "version": "0.1.7",
+  "version": "1.0.0",
   "description": "Middleware framework for JavaScript functions",
   "scripts": {
     "test": "set -e; for t in test/*.js; do node $t; done"
