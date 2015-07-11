@@ -132,6 +132,8 @@ function define(){
         index++;
 
         fn.call(self, ctx, next, end);
+        //args without next()
+        if(fn.length < 2) next();
       }else{
         //trigger empty callback if no more pipe
         next(null);

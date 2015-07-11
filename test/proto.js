@@ -10,9 +10,9 @@ function base(ctx, next){
   ctx.logs = ['clock'];
   next();
 }
-function tick(ctx, next){
+function tick(ctx){
+  //no callback
   ctx.logs.push(this._tick);
-  next();
 }
 function tock(ctx, next){
   ctx.logs.push(this._tock);
