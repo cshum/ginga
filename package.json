@@ -3,7 +3,9 @@
   "version": "1.0.0",
   "description": "Middleware framework for JavaScript functions",
   "scripts": {
-    "test": "set -e; for t in test/*.js; do node $t; done"
+    "test": "set -e; for t in test/*.js; do node $t; done",
+    "build": "rm -rf dist; mkdir dist; npm run browserify;",
+    "browserify": "browserify . -s ginga | derequire > dist/ginga.js"
   },
   "repository": {
     "type": "git",
@@ -19,6 +21,7 @@
   "license": "MIT",
   "dependencies": {},
   "devDependencies": {
-    "tape": "^3.0.2"
+    "tape": "^3.0.2",
+    "derequire": "^2.0.0"
   }
 }
