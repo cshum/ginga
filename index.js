@@ -1,10 +1,7 @@
 var is      = require('./is'),
     flatten = require('./flatten'),
+    EventEmitter = require('events').EventEmitter,
     params  = require('./params');
-
-var prototypeOf = Object.getPrototypeOf || function(obj){
-  return obj.__proto__; 
-};
 
 //ginga use method
 function use(){
@@ -93,7 +90,7 @@ function define(){
     while(obj){
       if(obj.hasOwnProperty('_hooks') && obj._hooks[name])
         pipe.unshift(obj._hooks[name]);
-      obj = prototypeOf(obj);
+      obj = Object.getPrototypeOf(obj);
     }
     //pre middlewares
     pipe.unshift(pre);
@@ -105,17 +102,17 @@ function define(){
     pipe = flatten(pipe);
 
     //context object and next triggerer
-    var ctx = {
-      method: name,
-      args: args
-    };
+    var ctx = new EventEmitter();
+    ctx.method = name;
+    ctx.args = args;
+
     var index = 0;
     var size = pipe.length;
-    var cbArgs = null;
+    var cb = null;
 
     function end(fn){
-      if(cbArgs)
-        fn.apply(self, cbArgs);
+      if(cb)
+        fn.apply(self, cb);
       else if(is.function(fn))
         callbacks.push(fn);
     }
@@ -123,7 +120,8 @@ function define(){
       if(arguments.length > 0){
         for(var i = 0, l = callbacks.length; i<l; i++)
           callbacks[i].apply(self, arguments);
-        cbArgs = Array.prototype.slice.call(arguments);
+        cb = Array.prototype.slice.call(arguments);
+        ctx.emit.apply(ctx, ['end'].concat(cb));
         return;
       }
       if(index < size){
