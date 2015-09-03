@@ -4,22 +4,22 @@ Ginga is a utility module that enables a middleware based (express inspired), mo
 
 [![Build Status](https://travis-ci.org/cshum/ginga.svg?branch=master)](https://travis-ci.org/cshum/ginga)
 
-```bash
-$ npm install ginga
+```
+npm install ginga
 ```
 
 #### ginga([object])
 Initialise `ginga`
 
 ```js
-var ginga = require('ginga');
-var obj = ginga(); //as a new object
+var ginga = require('ginga')
+var obj = ginga() //as a new object
 
-var app = {};
-ginga(app); //as a mixin
+var app = {}
+ginga(app) //as a mixin
 
-function App(){ }
-ginga(App.prototype); //as a prototype mixin:
+function App () { }
+ginga(App.prototype) //as a prototype mixin
 ```
 
 ### Method and Hook
@@ -32,28 +32,28 @@ In addition several `hook` can be mounted for additional validations or amendmen
 #### app.use(name, [hook...])
 
 ```js
-var ginga = require('ginga');
-var app = ginga();
+var ginga = require('ginga')
+var app = ginga()
 
 //defining method
-app.define('test', function(ctx, next){
-  ctx.logs = ['pre'];
-  next();
-}, function(ctx, done){
-  ctx.logs.push('invoke');
-  done(null, ctx.logs);
-});
+app.define('test', function (ctx, next) {
+  ctx.logs = ['pre']
+  next()
+}, function (ctx, done) {
+  ctx.logs.push('invoke')
+  done(null, ctx.logs)
+})
 
 //hook
-app.use('test', function(ctx, next){
-  ctx.logs.push('hook');
-  next();
-});
+app.use('test', function (ctx, next) {
+  ctx.logs.push('hook')
+  next()
+})
 
 //call method
-app.test(function(err, res){
-  console.log(res); //['pre', 'hook', 'invoke']
-});
+app.test(function (err, res) {
+  console.log(res) //['pre', 'hook', 'invoke']
+})
 ```
 
 ### Middleware
@@ -83,26 +83,26 @@ Ginga built in `ginga.params` middleware for parsing method arguments. Supports 
 * `?` - optional parameter.
 
 ```js
-var ginga = require('ginga');
-var params = ginga.params;
+var ginga = require('ginga')
+var params = ginga.params
 
-var app = ginga();
+var app = ginga()
 
 //define method with params parsing
-app.define('test', params('a:string','b:number?','c:string?'), function(ctx, done){
-  done(null, ctx.params); 
-});
+app.define('test', params('a:string', 'b:number?', 'c:string?'), function (ctx, done) {
+  done(null, ctx.params) 
+})
 
 //call method
-app.test('s',1,function(err, res){
-  console.log(res); //{"a":"s", "b":1}
-});
-app.test('s','t',function(err, res){
-  console.log(res); //{"a":"s", "c":"t"}
-});
-app.test(function(err, res){
-  console.log(err); //Error: Too few arguments. Expected at least 1
-});
+app.test('s',1,function (err, res) {
+  console.log(res) //{"a":"s", "b":1}
+})
+app.test('s','t',function (err, res) {
+  console.log(res) //{"a":"s", "c":"t"}
+})
+app.test(function (err, res) {
+  console.log(err) //Error: Too few arguments. Expected at least 1
+})
 ```
 
 ### Plugin
@@ -112,77 +112,77 @@ app.test(function(err, res){
 `app.use` also accepts Ginga object as plugin. This will mount hooks into the main app.
 
 ```js
-var ginga = require('ginga');
+var ginga = require('ginga')
 
 //define app
-var app = ginga(); 
-app.define('test', function(ctx, next){
-  ctx.logs = ['pre'];
-  next();
-}, function(ctx, done){
-  ctx.logs.push('invoke');
-  done(null, ctx.logs);
-});
+var app = ginga() 
+app.define('test', function (ctx, next) {
+  ctx.logs = ['pre']
+  next()
+}, function (ctx, done) {
+  ctx.logs.push('invoke')
+  done(null, ctx.logs)
+})
 
 //define plugin
-var plugin = ginga();
-plugin.use('test', function(ctx, next){
-  ctx.logs.push('plugin');
-  next();
-});
+var plugin = ginga()
+plugin.use('test', function (ctx, next) {
+  ctx.logs.push('plugin')
+  next()
+})
 
 //use plugin
-app.use(plugin);
+app.use(plugin)
 
 //call methods
-app.test(function(err, res){
-  console.log(res); //['pre','plugin', 'invoke']
-});
+app.test(function (err, res) {
+  console.log(res) //['pre','plugin', 'invoke']
+})
 ```
 
 ### Inheritance
 By initialising Ginga with prototype mixin, hooks are also inherited in prototype chain:
 
 ```js
-var ginga = require('ginga');
+var ginga = require('ginga')
 
-function App(){}
-var A = ginga(App.prototype); //ginga prototype mixin
+function App () { }
+var A = ginga(App.prototype) //ginga prototype mixin
 
-A.define('test', function(ctx, next){
-  ctx.logs = ['pre'];
-  next();
-}, function(ctx, done){
-  ctx.logs.push('invoke');
-  done(null, ctx.logs);
-});
+A.define('test', function (ctx, next) {
+  ctx.logs = ['pre']
+  next()
+}, function (ctx, done) {
+  ctx.logs.push('invoke')
+  done(null, ctx.logs)
+})
 
-var a1 = new App();
-var a2 = new App();
+var a1 = new App()
+var a2 = new App()
 
 //prototype hook
-A.use('test', function(ctx, next){
-  ctx.logs.push('A hook');
-  next();
-});
+A.use('test', function (ctx, next) {
+  ctx.logs.push('A hook')
+  next()
+})
 
 //instance hook
-a1.use('test', function(ctx, next){
-  ctx.logs.push('a1 hook');
-  next();
-});
-a2.use('test', function(ctx, next){
-  ctx.logs.push('a2 hook');
-  next();
-});
+a1.use('test', function (ctx, next) {
+  ctx.logs.push('a1 hook')
+  next()
+})
+a2.use('test', function (ctx, next) {
+  ctx.logs.push('a2 hook')
+  next()
+})
 
 //call methods
-a1.test(function(err, res){
-  console.log(res); //['pre','A hook','a1 hook', 'invoke']
-});
-a2.test(function(err, res){
-  console.log(res); //['pre','A hook','a2 hook', 'invoke']
-});
+a1.test(function (err, res) {
+  console.log(res) //['pre','A hook','a1 hook', 'invoke']
+})
+a2.test(function (err, res) {
+  console.log(res) //['pre','A hook','a2 hook', 'invoke']
+})
 
 ```
 
