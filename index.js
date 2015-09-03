@@ -66,7 +66,7 @@ function define () {
     return this
   }
 
-  if (!is.string(name)) throw new Error('method name is not defined')
+  if (!is.string(name)) throw new Error('Method name is not defined')
 
   var invoke = args.pop()
   if (!is.function(invoke)) invoke = null

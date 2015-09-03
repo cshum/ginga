@@ -34,7 +34,7 @@ module.exports = function () {
     }
     spec.push(obj)
   }
-  return function (ctx, next) {
+  return function params (ctx, next) {
     var args = ctx.args
     var len = args.length
     var params = {}
@@ -43,8 +43,9 @@ module.exports = function () {
 
     ctx.params = params
     if (len < min) {
-      return next(
-        new Error('Too few arguments. Expected at least ' + min))
+      return next(new Error(
+        'Too few arguments. Expected at least ' + min
+      ))
     }
     while (offset < len && index < specLen) {
       while (
