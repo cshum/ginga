@@ -89,7 +89,7 @@ var params = ginga.params;
 var app = ginga();
 
 //define method with params parsing
-app.define('test', params('a:string','b:number?','c:string?'), function(ctx, done){
+app.define('test', params('a', 'b:number?', 'c:string?'), function(ctx, done){
   done(null, ctx.params); 
 });
 
