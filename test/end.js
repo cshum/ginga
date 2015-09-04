@@ -49,5 +49,4 @@ tape('ginga end after', function (t) {
     t.deepEqual(err, 'err')
     t.deepEqual(res, 'res')
   })
-
 })
