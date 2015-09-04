@@ -94,11 +94,11 @@ app.define('test', params('a', 'b:number?', 'c:string?'), function (ctx, done) {
 })
 
 //call method
-app.test('s',1,function (err, res) {
-  console.log(res) //{"a":"s", "b":1}
+app.test('s', 1, function (err, res) {
+  console.log(res) //{ a: 's', b: 1 }
 })
-app.test('s','t',function (err, res) {
-  console.log(res) //{"a":"s", "c":"t"}
+app.test('s', 't', function (err, res) {
+  console.log(res) //{ a: 's', c: 't' }
 })
 app.test(function (err, res) {
   console.log(err) //Error: Too few arguments. Expected at least 1
