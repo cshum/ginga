@@ -69,13 +69,13 @@ Middleware turns asynchronous function into encapsulated, reusable set of buildi
 
 Upon calling a method, Ginga goes through a sequence of functions `middleware`. A middleware consists of arguments: 
 * `ctx` - context event emitter object. Emits `.on('end', fn)` event on callback with error and result arguments.
-* `next` - callback function, invoke with `next()` or `next(err, result)` 
+* `next` - callback function, invoke with `next()` or `next(err, result)` or `asyncFn(next(resolveFn))`
 
 The context object `ctx` maintains state throughout the method call, while encapsulated from `this` object.
 
 A middleware can make changes to context object, or access changes made by previous middleware functions.
 
-Current middleware must call `next()` to pass control to the next middleware, or `next(err, result)` to end the sequence and callback with error and result.
+Given next argument, current middleware must call `next()` to pass control to the next middleware, or `next(err, result)` to end the sequence and callback with error or result.
 Otherwise the method will be left hanging.
 
 #### ginga.params([param...])
