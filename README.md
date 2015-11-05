@@ -1,6 +1,6 @@
 # Ginga.js
 
-Ginga is a utility module that enables a middleware based (express inspired), modular architecture for creating asynchronous JavaScript methods.
+Ginga is a utility module that enables a middleware based (express inspired), modular architecture for creating asynchronous JavaScript function. Supports both callback and [promise](https://github.com/floatdrop/pinkie-promise).
 
 [![Build Status](https://travis-ci.org/cshum/ginga.svg?branch=master)](https://travis-ci.org/cshum/ginga)
 
@@ -25,8 +25,10 @@ ginga(App.prototype) //as a prototype mixin
 ### Method and Hook
 
 `define()` and `use()` a method with `pre`, `hook`, `invoke` middleware functions.
-`pre` middleware functions initiate and batch operations where `invoke` commits the result. 
-In addition several `hook` can be mounted for additional validations or amendments.
+`pre` middlewares initiate and batch operations where `invoke` commits result. 
+`hook` can be mounted for additional validations or amendments.
+
+Ginga method supports both callback and [promise](https://github.com/floatdrop/pinkie-promise).
 
 #### app.define(name, [pre...], invoke)
 #### app.use(name, [hook...])
@@ -35,7 +37,7 @@ In addition several `hook` can be mounted for additional validations or amendmen
 var ginga = require('ginga')
 var app = ginga()
 
-//defining method
+// defining method
 app.define('test', function (ctx, next) {
   ctx.logs = ['pre']
   next()
@@ -44,15 +46,20 @@ app.define('test', function (ctx, next) {
   done(null, ctx.logs)
 })
 
-//hook
+// hook
 app.use('test', function (ctx, next) {
   ctx.logs.push('hook')
   next()
 })
 
-//call method
+// method callback
 app.test(function (err, res) {
-  console.log(res) //['pre', 'hook', 'invoke']
+  console.log(res) // ['pre', 'hook', 'invoke']
+})
+
+// no callback function: returns Promise
+app.test().then(function (res) {
+  console.log(res) // ['pre', 'hook', 'invoke']
 })
 ```
 
