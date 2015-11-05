@@ -1,8 +1,8 @@
 var tape = require('tape')
 var ginga = require('../')
 
-tape('ginga end', function (t) {
-  t.plan(4)
+tape('end callback and promise', function (t) {
+  t.plan(10)
   var obj = ginga().define('f', function (ctx, done, end) {
     end(function (err, res) {
       t.deepEqual(err, 'err')
@@ -15,9 +15,17 @@ tape('ginga end', function (t) {
     t.deepEqual(err, 'err')
     t.deepEqual(res, 'res')
   })
+
+  t.equal(typeof obj.f().then, 'function', 'no cb returns promise')
+
+  obj.f().then(function (res) {
+    t.error(res, 'not resolved if error')
+  }).catch(function (err) {
+    t.deepEqual(err, 'err')
+  })
 })
 
-tape('ginga end emitter', function (t) {
+tape('end emitter', function (t) {
   t.plan(4)
   var obj = ginga().define('f', function (ctx, done) {
     ctx.on('end', function (err, res) {
@@ -33,7 +41,7 @@ tape('ginga end emitter', function (t) {
   })
 })
 
-tape('ginga end after', function (t) {
+tape('end after', function (t) {
   t.plan(4)
   var obj = ginga().define('f', function (ctx, done, end) {
     setTimeout(function () {

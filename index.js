@@ -2,6 +2,7 @@ var is = require('./is')
 var flatten = require('./flatten')
 var EventEmitter = require('events').EventEmitter
 var params = require('./params')
+var Promise = require('pinkie-promise')
 
 // ginga use method
 function use () {
@@ -113,6 +114,7 @@ function define () {
       if (cb) fn.apply(self, cb)
       else if (is.function(fn)) callbacks.push(fn)
     }
+
     function next () {
       if (arguments.length > 0) {
         for (var i = 0, l = callbacks.length; i < l; i++) {
@@ -134,9 +136,20 @@ function define () {
         next(null)
       }
     }
-    next()
 
-    return this
+    if (callbacks.length) {
+      next()
+    } else {
+      // use promise
+      return new Promise(function (resolve, reject) {
+        callbacks.push(function (err, result) {
+          if (err) return reject(err)
+          resolve(result)
+        })
+        next()
+      })
+    }
+
   }
   return this
 }
