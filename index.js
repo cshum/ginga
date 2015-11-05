@@ -115,7 +115,14 @@ function define () {
       else if (is.function(fn)) callbacks.push(fn)
     }
 
-    function next () {
+    function next (resolve) {
+      if (typeof resolve === 'function') {
+        return function (err, result) {
+          if (err) return next(err)
+          resolve(result)
+          next()
+        }
+      }
       if (arguments.length > 0) {
         for (var i = 0, l = callbacks.length; i < l; i++) {
           callbacks[i].apply(self, arguments)
