@@ -47,5 +47,4 @@ tape('ginga params', function (t) {
   .catch(function (err) {
     t.equal(err.message, 'Too few arguments. Expected at least 2')
   })
-
 })

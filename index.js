@@ -22,7 +22,7 @@ function use () {
       use.apply(this, [arr[i]].concat(args))
     }
     return this
-  }else if (is.object(args[0]) && args[0]._hooks) {
+  } else if (is.object(args[0]) && args[0]._hooks) {
     // use(ginga)
     var key
     // concat hooks
@@ -149,7 +149,6 @@ function define () {
         next()
       })
     }
-
   }
   return this
 }
