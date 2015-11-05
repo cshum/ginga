@@ -19,7 +19,9 @@
   ],
   "author": "Adrian C Shum <adrian@cshum.com>",
   "license": "MIT",
-  "dependencies": {},
+  "dependencies": {
+    "pinkie-promise": "^1.0.0"
+  },
   "devDependencies": {
     "derequire": "^2.0.0",
     "standard": "^5.1.1",
