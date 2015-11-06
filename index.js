@@ -111,6 +111,7 @@ function define () {
 
     function next (resolve) {
       if (is.function(resolve)) {
+        // resolver callback
         return function (err, result) {
           if (err) return next(err)
           resolve(result)
@@ -122,15 +123,21 @@ function define () {
         var args = ['end']
         Array.prototype.push.apply(args, arguments)
         ctx.emit.apply(ctx, args)
-        return
-      }
-      if (index < size) {
+      } else if (index < size) {
         var fn = pipe[index]
         index++
-
-        fn.call(self, ctx, next)
-        // args without next()
-        if (fn.length < 2) next()
+        var val = fn.call(self, ctx, next)
+        if (val && is.function(val.then)) {
+          // thenable: handle promise
+          val.then(function (res) {
+            if (res === undefined) next() // next
+            else next(null, res) // result
+          }, next)
+        } else if (fn.length < 2) {
+          // args without next()
+          if (val === undefined) next() // no return, next
+          else next(null, val) // result
+        }
       } else {
         // trigger empty callback if no more pipe
         next(null)

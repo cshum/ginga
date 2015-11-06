@@ -2,8 +2,8 @@ var tape = require('tape')
 var ginga = require('../')
 var params = ginga.params
 
-function invoke (ctx, done) {
-  return done(null, ctx.params)
+function invoke (ctx) {
+  return ctx.params
 }
 var obj = ginga()
   .define('f1', params('a:string', 'b:string?', 'c:number?'), invoke)
@@ -27,23 +27,15 @@ tape('ginga params', function (t) {
   obj.f1('1', '2')
   .then(function (res) {
     t.deepEqual(res, { a: '1', b: '2' }, 'promise resolve')
-  })
-  .catch(function (err) {
-    t.error(err, 'no promise error')
-  })
+  }).catch(t.error)
 
   obj.f1('1', 167)
   .then(function (res) {
     t.deepEqual(res, { a: '1', c: 167 }, 'promise resolve')
-  })
-  .catch(function (err) {
-    t.error(err, 'no promise error')
-  })
+  }).catch(t.error)
 
   obj.f2('1')
-  .then(function (res) {
-    t.error(res, 'error no resolve')
-  })
+  .then(t.error)
   .catch(function (err) {
     t.equal(err.message, 'Too few arguments. Expected at least 2')
   })

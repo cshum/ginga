@@ -1,8 +1,9 @@
 var tape = require('tape')
 var ginga = require('../')
+var Promise = require('pinkie-promise')
 
 tape('ginga prototype', function (t) {
-  t.plan(12)
+  t.plan(10)
 
   function Clock () {
     this._tick = 'tick'
@@ -17,40 +18,42 @@ tape('ginga prototype', function (t) {
     ctx.logs.push(this._tick)
     // resolver function
     next(function (result) {
-      t.equal(result, 167199, 'resolver result')
+      t.equal(result, 167199, 'callback resolver')
     })(null, 167199)
   }
   function tock (ctx) {
     // no next arg
     ctx.logs.push(this._tock)
   }
-  function end (ctx, done) {
+  function end (ctx) {
     ctx.logs.push('done')
-    done(null, ctx.logs)
+    // then result
+    return new Promise(function (resolve) {
+      setTimeout(function () {
+        resolve(ctx.logs)
+      }, 10)
+    })
   }
   var C = ginga(Clock.prototype)
 
   var clock1 = new Clock()
   var clock2 = new Clock()
 
-  clock2.use(
-    'tick',
-    function (ctx) {
-      ctx.logs.push('more')
-    },
-    function (ctx) {
-      ctx.logs.push('and more tick')
-    }
-  )
-  clock2.use(
-    'tock',
-    function (ctx, next) {
-      // resolver function err
-      next(function (res) {
-        t.error('resolver called')
-      })('booooom')
-    }
-  )
+  clock2.use('tick', function (ctx) {
+    // return thenable
+    return new Promise(function (resolve) {
+      setTimeout(function () {
+        ctx.logs.push('more')
+        resolve() // no value, should do next
+      }, 10)
+    })
+  }, function (ctx) {
+    ctx.logs.push('and more tick')
+  })
+  clock2.use('tock', function (ctx, next) {
+    // resolver callback err
+    next(t.error)('booooom')
+  })
 
   C.define('tick', end)
   C.define('tock', end)
@@ -61,16 +64,15 @@ tape('ginga prototype', function (t) {
     t.notOk(err, 'no error')
     t.deepEqual(res, ['clock', 'tick', 'done'])
   })
-  clock1.tock(function (err, res) {
-    t.notOk(err, 'no error')
+  clock1.tock().then(function (res) {
     t.deepEqual(res, ['clock', 'tick', 'tock', 'done'])
-  })
+  }).catch(t.error)
+
   clock2.tick(function (err, res) {
     t.notOk(err, 'no error')
     t.deepEqual(res, ['clock', 'tick', 'more', 'and more tick', 'done'])
   })
-  clock2.tock(function (err, res) {
-    t.notOk(res, 'no result')
+  clock2.tock().then(t.error).catch(function (err) {
     t.equal(err, 'booooom', 'return error')
   })
 })
