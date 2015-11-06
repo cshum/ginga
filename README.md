@@ -43,8 +43,8 @@ Upon calling a method, Ginga method goes through a sequence of middleware functi
   * A middleware can make changes to context object, or access changes made by previous middleware.
   * Emits end event `ctx.on('end', fn)` on callback with error and result arguments.
 * `next` - callback function:
-  * invoke `next()` to pass control to the next middleware.
-  * invoke `next(err, result)` to end the sequence and callback with error or result.
+  * `next()` to pass control to the next middleware.
+  * `next(err, result)` to end the sequence and callback with error or result.
 
 ```js
 var ginga = require('ginga')
@@ -74,6 +74,41 @@ app.test(function (err, res) {
 app.test().then(function (res) {
   console.log(res) // ['pre', 'hook', 'invoke']
 })
+```
+
+Ginga also comes with handy patterns for working with callback functions:
+
+```js
+function (ctx, next) {
+  task(function (err, res) {
+    if (err) return next(err)
+    // do stuff
+    next()
+  })
+}
+// equivalent to
+function (ctx, next) {
+  task(next(function (res) {
+    // do stuff
+  }))
+}
+```
+
+Working with promise:
+
+```js
+function (ctx, next) {
+  taskAsync().then(function (res) {
+    // do stuff
+    next()
+  }).catch(next)
+}
+// equivalent to
+function (ctx) {
+  return taskAsync().then(function (res) {
+    // do stuff
+  })
+}
 ```
 
 #### ginga.params([param...])
