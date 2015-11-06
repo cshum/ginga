@@ -24,23 +24,36 @@ ginga(App.prototype) //as a prototype mixin
 
 ### Method and Hook
 
+#### app.define(name, [pre...], invoke)
+#### app.use(name, [hook...])
+
 `define()` and `use()` a method with `pre`, `hook`, `invoke` middleware functions.
 `pre` middlewares initiate and batch operations where `invoke` commits result. 
 `hook` can be mounted for additional validations or amendments.
 
 Ginga method supports both callback and [promise](https://github.com/floatdrop/pinkie-promise).
 
-#### app.define(name, [pre...], invoke)
-#### app.use(name, [hook...])
+### Middleware
+
+Middleware turns asynchronous functions into encapsulated, reusable set of building blocks. 
+Upon calling a method, Ginga method goes through a sequence of middleware functions, with following arguments:
+
+* `ctx` - context event emitter object:
+  * Maintains state throughout the method call, while encapsulated from `this` object.
+  * A middleware can make changes to context object, or access changes made by previous middleware.
+  * Emits end event `ctx.on('end', fn)` on callback with error and result arguments.
+* `next` - callback function:
+  * invoke `next()` to pass control to the next middleware.
+  * invoke `next(err, result)` to end the sequence and callback with error or result.
 
 ```js
 var ginga = require('ginga')
 var app = ginga()
 
-// defining method
-app.define('test', function (ctx, next) {
+// define method
+app.define('test', function (ctx) {
   ctx.logs = ['pre']
-  next()
+  // auto invoke next middleware if no next argument
 }, function (ctx, done) {
   ctx.logs.push('invoke')
   done(null, ctx.logs)
@@ -49,39 +62,24 @@ app.define('test', function (ctx, next) {
 // hook
 app.use('test', function (ctx, next) {
   ctx.logs.push('hook')
-  next()
+  setTimeout(next, 10) // async next
 })
 
-// method callback
+// method call with callback function
 app.test(function (err, res) {
   console.log(res) // ['pre', 'hook', 'invoke']
 })
 
-// no callback function: returns Promise
+// method call with promise
 app.test().then(function (res) {
   console.log(res) // ['pre', 'hook', 'invoke']
 })
 ```
 
-### Middleware
-
-Middleware turns asynchronous function into encapsulated, reusable set of building blocks. 
-
-Upon calling a method, Ginga goes through a sequence of functions `middleware`. A middleware consists of arguments: 
-* `ctx` - context event emitter object. Emits `.on('end', fn)` event on callback with error and result arguments.
-* `next` - callback function, invoke with `next()` or `next(err, result)` or `asyncFn(next(resolveFn))`
-
-The context object `ctx` maintains state throughout the method call, while encapsulated from `this` object.
-
-A middleware can make changes to context object, or access changes made by previous middleware functions.
-
-Given next argument, current middleware must call `next()` to pass control to the next middleware, or `next(err, result)` to end the sequence and callback with error or result.
-Otherwise the method will be left hanging.
-
 #### ginga.params([param...])
 
 Ginga built in `ginga.params` middleware for parsing method arguments. Supports optional parameters and type-checking.
-`param` is a string in form 
+`param` is string in form of
 
 `name[:type][?]`
 
@@ -96,8 +94,8 @@ var params = ginga.params
 var app = ginga()
 
 //define method with params parsing
-app.define('test', params('a', 'b:number?', 'c:string?'), function (ctx, done) {
-  done(null, ctx.params) 
+app.define('test', params('a', 'b:number?', 'c:string?'), function (ctx) {
+  return ctx.params
 })
 
 //call method
