@@ -78,9 +78,9 @@ function define () {
   this[name] = function () {
     var args = Array.prototype.slice.call(arguments)
     var self = this
+    var callback
 
-    var callbacks = []
-    if (is.function(args[args.length - 1])) callbacks.push(args.pop())
+    if (is.function(args[args.length - 1])) callback = args.pop()
 
     // init pipeline
     var pipe = []
@@ -108,15 +108,9 @@ function define () {
 
     var index = 0
     var size = pipe.length
-    var cb = null
-
-    function end (fn) {
-      if (cb) fn.apply(self, cb)
-      else if (is.function(fn)) callbacks.push(fn)
-    }
 
     function next (resolve) {
-      if (typeof resolve === 'function') {
+      if (is.function(resolve)) {
         return function (err, result) {
           if (err) return next(err)
           resolve(result)
@@ -124,18 +118,17 @@ function define () {
         }
       }
       if (arguments.length > 0) {
-        for (var i = 0, l = callbacks.length; i < l; i++) {
-          callbacks[i].apply(self, arguments)
-        }
-        cb = Array.prototype.slice.call(arguments)
-        ctx.emit.apply(ctx, ['end'].concat(cb))
+        if (callback) callback.apply(self, arguments)
+        var args = ['end']
+        Array.prototype.push.apply(args, arguments)
+        ctx.emit.apply(ctx, args)
         return
       }
       if (index < size) {
         var fn = pipe[index]
         index++
 
-        fn.call(self, ctx, next, end)
+        fn.call(self, ctx, next)
         // args without next()
         if (fn.length < 2) next()
       } else {
@@ -144,15 +137,15 @@ function define () {
       }
     }
 
-    if (callbacks.length) {
+    if (callback) {
       next()
     } else {
-      // use promise
+      // use promise if no callback
       return new Promise(function (resolve, reject) {
-        callbacks.push(function (err, result) {
+        callback = function (err, result) {
           if (err) return reject(err)
           resolve(result)
-        })
+        }
         next()
       })
     }
