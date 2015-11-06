@@ -51,9 +51,9 @@ var ginga = require('ginga')
 var app = ginga()
 
 // define method
-app.define('test', function (ctx) {
+app.define('test', function (ctx, next) {
   ctx.logs = ['pre']
-  // auto invoke next middleware if no next argument
+  next()
 }, function (ctx, done) {
   ctx.logs.push('invoke')
   done(null, ctx.logs)
@@ -129,8 +129,8 @@ var params = ginga.params
 var app = ginga()
 
 //define method with params parsing
-app.define('test', params('a', 'b:number?', 'c:string?'), function (ctx) {
-  return ctx.params
+app.define('test', params('a', 'b:number?', 'c:string?'), function (ctx, done) {
+  done(null, ctx.params)
 })
 
 //call method
