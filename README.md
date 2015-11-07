@@ -76,7 +76,7 @@ app.test().then(function (res) {
 })
 ```
 
-Ginga also comes with handy patterns for working with callback functions:
+shortcuts for callback functions:
 
 ```js
 function (ctx, next) {
@@ -91,23 +91,6 @@ function (ctx, next) {
   task(next(function (res) {
     // do stuff
   }))
-}
-```
-
-Working with promise:
-
-```js
-function (ctx, next) {
-  taskAsync().then(function (res) {
-    // do stuff
-    next()
-  }).catch(next)
-}
-// equivalent to
-function (ctx) {
-  return taskAsync().then(function (res) {
-    // do stuff
-  })
 }
 ```
 
