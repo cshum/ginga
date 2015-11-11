@@ -1,5 +1,6 @@
 var tape = require('tape')
 var ginga = require('../')
+var Promise = require('pinkie-promise')
 
 tape('ginga prototype', function (t) {
   t.plan(12)
