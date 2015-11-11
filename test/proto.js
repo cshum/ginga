@@ -36,7 +36,12 @@ tape('ginga prototype', function (t) {
   clock2.use(
     'tick',
     function (ctx) {
-      ctx.logs.push('more')
+      return new Promise(function (resolve) {
+        setTimeout(function () {
+          ctx.logs.push('more')
+          resolve() // no value, should do next
+        }, 10)
+      })
     },
     function (ctx) {
       ctx.logs.push('and more tick')
@@ -44,11 +49,13 @@ tape('ginga prototype', function (t) {
   )
   clock2.use(
     'tock',
-    function (ctx, next) {
-      // resolver function err
-      next(function (res) {
-        t.error('resolver called')
-      })('booooom')
+    function (ctx) {
+      // promise reject
+      return new Promise(function (resolve, reject) {
+        setTimeout(function () {
+          reject('booooom') // no value, should do next
+        }, 10)
+      })
     }
   )
 
