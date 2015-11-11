@@ -105,6 +105,8 @@ function define () {
     var ctx = new EventEmitter()
     ctx.method = name
     ctx.args = args
+    ctx.resolve = next.bind(null, null)
+    ctx.reject = next
 
     var index = 0
     var size = pipe.length
@@ -128,9 +130,18 @@ function define () {
         var fn = pipe[index]
         index++
 
-        fn.call(self, ctx, next)
-        // args without next()
-        if (fn.length < 2) next()
+        var val = fn.call(self, ctx, next)
+        if (fn.length < 2) {
+          // args without next()
+          if (val && is.function(val.then)) {
+            // thenable
+            val.then(function () {
+              next()
+            }).catch(next)
+          } else {
+            next()
+          }
+        }
       } else {
         // trigger empty callback if no more pipe
         next(null)
