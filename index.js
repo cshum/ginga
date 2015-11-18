@@ -105,17 +105,14 @@ function define () {
     var ctx = new EventEmitter()
     ctx.method = name
     ctx.args = args
-    ctx.resolve = next.bind(null, null)
-    ctx.reject = next
-
     var index = 0
     var size = pipe.length
 
-    function next (resolve) {
-      if (is.function(resolve)) {
+    function next (cb) {
+      if (is.function(cb)) {
         return function (err, result) {
           if (err) return next(err)
-          resolve(result)
+          cb(result)
           next()
         }
       }
@@ -128,24 +125,32 @@ function define () {
       }
       if (index < size) {
         var fn = pipe[index]
+        var argsLen = fn.length
         index++
 
-        var val = fn.call(self, ctx, next)
-        if (fn.length < 2) {
-          // args without next()
-          if (val && is.function(val.then)) {
-            // thenable
-            val.then(function () {
-              next()
-            }).catch(next)
-          } else {
+        var val = argsLen > 2
+          ? fn.call(self, ctx, resolve, reject)
+          : fn.call(self, ctx, next)
+
+        if (val && is.function(val.then)) {
+          // thenable
+          val.then(function () {
             next()
-          }
+          }).catch(reject)
+        } else if (argsLen < 2) {
+          // args without next()
+          next()
         }
       } else {
         // trigger empty callback if no more pipe
         next(null)
       }
+    }
+    function reject (err) {
+      next(err || true)
+    }
+    function resolve (res) {
+      next(null, res)
     }
 
     if (callback) {
