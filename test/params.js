@@ -2,8 +2,8 @@ var tape = require('tape')
 var ginga = require('../')
 var params = ginga.params
 
-function invoke (ctx, done) {
-  return done(null, ctx.params)
+function invoke (ctx, resolve, reject) {
+  return resolve(ctx.params)
 }
 var obj = ginga()
   .define('f1', params('a:string', 'b:string?', 'c:number?'), invoke)

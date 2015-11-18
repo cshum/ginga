@@ -27,9 +27,8 @@ ginga(Clock.prototype)
   .define('tock', base, tick, tock, end)
 
 var plugin = ginga()
-.use('tick', function (ctx, next) {
+.use('tick', function (ctx) {
   ctx.logs.push('more')
-  next()
 }, function (ctx, next) {
   ctx.logs.push('and more tick')
   next()
