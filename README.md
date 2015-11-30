@@ -53,16 +53,15 @@ var app = ginga()
 // define method
 app.define('test', function (ctx, next) {
   ctx.logs = ['pre']
-  next()
+  next() // no argument, next middleware
 }, function (ctx, done) {
   ctx.logs.push('invoke')
-  done(null, ctx.logs)
+  done(null, ctx.logs) // callback with arguments
 })
 
 // hook
-app.use('test', function (ctx, next) {
+app.use('test', function (ctx) {
   ctx.logs.push('hook')
-  setTimeout(next, 10) // async next
 })
 
 // method call with callback function
@@ -76,22 +75,24 @@ app.test().then(function (res) {
 })
 ```
 
-shortcuts for callback functions:
+Using promise:
 
 ```js
-function (ctx, next) {
-  task(function (err, res) {
-    if (err) return next(err)
+var ginga = require('ginga')
+var app = ginga()
+
+// define method
+app.define('test', function (ctx) {
+  // return promise: 
+  //   pass to next middleware when resolved,
+  //   return error when rejected
+  return asyncFn.then(function (data) {
     // do stuff
-    next()
   })
-}
-// equivalent to
-function (ctx, next) {
-  task(next(function (res) {
-    // do stuff
-  }))
-}
+}, function (ctx, resolve, reject) {
+  // handle promise result
+  return asyncFn2.then(resolve).catch(reject)
+})
 ```
 
 #### ginga.params([param...])
