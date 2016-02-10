@@ -107,30 +107,56 @@ function define () {
     ctx.args = args
     var index = 0
     var size = pipe.length
+    var iter = null
 
-    function next (err) {
+    function next (err, res) {
       if (err || index === size) {
         // callback when err or end of pipeline
         if (callback) callback.apply(self, arguments)
         var args = ['end']
         Array.prototype.push.apply(args, arguments)
         ctx.emit.apply(ctx, args)
+      } else if (iter) {
+        // generator next
+        try {
+          var state = iter.next(res)
+          if (!state) return // should not happen
+          if (state.done) {
+            // generator done, next middleware
+            iter = null
+            index++
+            next(null, state.value)
+          } else if (state.value && is.function(state.value.then)) {
+            // thenable
+            state.value.then(function (res) {
+              next(null, res)
+            }, function (err) {
+              next(err || true)
+            })
+          }
+        } catch (err) {
+          next(err)
+        }
       } else if (index < size) {
         var fn = pipe[index]
-        index++
+        if (is.generator(fn)) {
+          iter = fn.call(self, ctx, next)
+          next()
+        } else {
+          index++
+          var val = fn.call(self, ctx, next)
 
-        var val = fn.call(self, ctx, next)
-
-        if (val && is.function(val.then)) {
-          // thenable
-          val.then(function (res) {
-            next(null, res)
-          }).catch(function (err) {
-            next(err || true)
-          })
-        } else if (fn.length < 2) {
-          // args without next(), not thenable
-          next(null, val)
+          if (val && is.function(val.then)) {
+            // thenable
+            val.then(function (res) {
+              next(null, res)
+            }, function (err) {
+              next(err || true)
+            })
+          } else if (fn.length < 2) {
+            // args without next(), not thenable
+            next(null, val)
+          }
         }
       }
     }
