@@ -108,14 +108,7 @@ function define () {
     var index = 0
     var size = pipe.length
 
-    function next (cb) {
-      if (is.function(cb)) {
-        return function (err, result) {
-          if (err) return next(err)
-          cb(result)
-          next()
-        }
-      }
+    function next () {
       if (arguments.length > 0) {
         if (callback) callback.apply(self, arguments)
         var args = ['end']

@@ -3,7 +3,7 @@ var ginga = require('../')
 var Promise = require('pinkie-promise')
 
 tape('ginga prototype', function (t) {
-  t.plan(12)
+  t.plan(8)
 
   function Clock () {
     this._tick = 'tick'
@@ -14,12 +14,9 @@ tape('ginga prototype', function (t) {
     // async callback
     setTimeout(next, 10)
   }
-  function tick (ctx, next) {
+  function tick (ctx) {
+    // no next arg
     ctx.logs.push(this._tick)
-    // resolver function
-    next(function (result) {
-      t.equal(result, 167199, 'resolver result')
-    })(null, 167199)
   }
   function tock (ctx) {
     // no next arg
