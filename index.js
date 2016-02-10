@@ -108,42 +108,35 @@ function define () {
     var index = 0
     var size = pipe.length
 
-    function next () {
-      if (arguments.length > 0) {
+    function next (err) {
+      if (err || index >= size) {
+        // callback when err or end of pipeline
         if (callback) callback.apply(self, arguments)
         var args = ['end']
         Array.prototype.push.apply(args, arguments)
         ctx.emit.apply(ctx, args)
-        return
-      }
-      if (index < size) {
+      } else if (index < size) {
         var fn = pipe[index]
         var argsLen = fn.length
         index++
 
-        var val = argsLen > 2
-          ? fn.call(self, ctx, resolve, reject)
-          : fn.call(self, ctx, next)
+        var val = fn.call(self, ctx, next)
 
         if (val && is.function(val.then)) {
           // thenable
-          val.then(function () {
-            next()
-          }).catch(reject)
+          val.then(function (res) {
+            next(null, res)
+          }).catch(function (err) {
+            next(err || true)
+          })
         } else if (argsLen < 2) {
           // args without next()
-          next()
+          next(null, val)
         }
       } else {
         // trigger empty callback if no more pipe
         next(null)
       }
-    }
-    function reject (err) {
-      next(err || true)
-    }
-    function resolve (res) {
-      next(null, res)
     }
 
     if (callback) {
