@@ -110,17 +110,10 @@ function define () {
     var iter = null
 
     function next (err, res) {
-      if (err || index === size) {
-        // callback when err or end of pipeline
-        if (callback) callback.apply(self, arguments)
-        var args = ['end']
-        Array.prototype.push.apply(args, arguments)
-        ctx.emit.apply(ctx, args)
-      } else if (iter) {
+      if (iter) {
         // generator next
         try {
-          var state = iter.next(res)
-          if (!state) return // should not happen
+          var state = err ? iter.throw(err) : iter.next(res)
           if (state.done) {
             // generator done, next middleware
             iter = null
@@ -135,12 +128,24 @@ function define () {
             })
           }
         } catch (err) {
+          // catch err, break generator
+          iter = null
           next(err)
         }
+      } else if (err || index === size) {
+        // callback when err or end of pipeline
+        if (callback) callback.apply(self, arguments)
+        var args = ['end']
+        Array.prototype.push.apply(args, arguments)
+        ctx.emit.apply(ctx, args)
       } else if (index < size) {
         var fn = pipe[index]
         if (is.generator(fn)) {
-          iter = fn.call(self, ctx, next)
+          iter = fn.call(self, ctx, function (err, res) {
+            process.nextTick(function () {
+              next(err, res)
+            })
+          })
           next()
         } else {
           index++
