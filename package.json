@@ -20,6 +20,7 @@
   "author": "Adrian C Shum <adrian@cshum.com>",
   "license": "MIT",
   "dependencies": {
+    "is-generator-function": "^1.0.3",
     "pinkie-promise": "^1.0.0"
   },
   "devDependencies": {
