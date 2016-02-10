@@ -3,8 +3,12 @@ var ginga = require('../')
 
 tape('Generator function', function (t) {
   var obj = ginga()
-    .define('v1', function (ctx) {
+    .define('v', function * (ctx, next) {
+      yield setTimeout(next, 0)
       return 522
+    })
+    .define('v1', function * () {
+      return yield this.v()
     })
     .define('v2', function (ctx, done) {
       setTimeout(function () {
@@ -12,10 +16,7 @@ tape('Generator function', function (t) {
       })
     })
     .define('f', function * (ctx, next) {
-      var v1 = yield this.v1()
-      yield setTimeout(next, 0)
-      var v2 = yield this.v2()
-      return v1 + v2
+      return (yield this.v1()) + (yield this.v2(next))
     })
 
   obj.f(function (err, res) {
