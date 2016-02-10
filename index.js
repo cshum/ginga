@@ -109,7 +109,7 @@ function define () {
     var size = pipe.length
 
     function next (err) {
-      if (err || index >= size) {
+      if (err || index === size) {
         // callback when err or end of pipeline
         if (callback) callback.apply(self, arguments)
         var args = ['end']
@@ -117,7 +117,6 @@ function define () {
         ctx.emit.apply(ctx, args)
       } else if (index < size) {
         var fn = pipe[index]
-        var argsLen = fn.length
         index++
 
         var val = fn.call(self, ctx, next)
@@ -129,13 +128,10 @@ function define () {
           }).catch(function (err) {
             next(err || true)
           })
-        } else if (argsLen < 2) {
-          // args without next()
+        } else if (fn.length < 2) {
+          // args without next(), not thenable
           next(null, val)
         }
-      } else {
-        // trigger empty callback if no more pipe
-        next(null)
       }
     }
 
