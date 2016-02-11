@@ -1,6 +1,6 @@
 # Ginga.js
 
-Ginga is a utility module that enables a middleware based (express inspired), modular architecture for creating asynchronous JavaScript function. Supports both callback and [promise](https://github.com/floatdrop/pinkie-promise).
+Ginga is a utility module that enables middleware based control flow for creating async JavaScript methods. Supports callback, promise and ES6 generator.
 
 [![Build Status](https://travis-ci.org/cshum/ginga.svg?branch=master)](https://travis-ci.org/cshum/ginga)
 
@@ -25,26 +25,27 @@ ginga(App.prototype) //as a prototype mixin
 ### Method and Hook
 
 #### app.define(name, [pre...], invoke)
+
+Creates an async `name` method that supports both callback and promise. See examples below.
+
 #### app.use(name, [hook...])
 
-`define()` and `use()` a method with `pre`, `hook`, `invoke` middleware functions.
-`pre` middlewares initiate and batch operations where `invoke` commits result. 
-`hook` can be mounted for additional validations or amendments.
-
-Ginga method supports both callback and [promise](https://github.com/floatdrop/pinkie-promise).
+Inject additional middleware between `pre` and `invoke` of method `name`. See examples below.
 
 ### Middleware
 
 Middleware turns asynchronous functions into encapsulated, reusable set of building blocks. 
-Upon calling a method, Ginga method goes through a sequence of middleware functions, with following arguments:
+Upon calling a method, Ginga method goes through a sequence of middleware functions with following arguments:
 
 * `ctx` - context event emitter object:
   * Maintains state throughout the method call, while encapsulated from `this` object.
   * A middleware can make changes to context object, or access changes made by previous middleware.
-  * Emits end event `ctx.on('end', fn)` on callback with error and result arguments.
-* `next` - callback function:
-  * `next()` to pass control to the next middleware.
-  * `next(err, result)` to end the sequence and callback with error or result.
+  * Emits `end` event with error and result arguments.
+* `next` - optional stepping function using callback, which ends the sequence if callback with error argument.
+
+Ginga middleware can be created using callback, promise or generator, interchangeably:
+
+#### Callback
 
 ```js
 var ginga = require('ginga')
@@ -52,11 +53,14 @@ var app = ginga()
 
 // define method
 app.define('test', function (ctx, next) {
-  ctx.logs = ['pre']
-  next() // no argument, next middleware
-}, function (ctx, done) {
+  setTimeout(function () {
+    ctx.logs = ['pre']
+    next() // next middleware callback
+  }, 1000)
+}, function (ctx) {
+  // not passing next argument: treated as synchronous call 
   ctx.logs.push('invoke')
-  done(null, ctx.logs) // callback with arguments
+  return ctx.logs // returns value of the end of middleware sequence
 })
 
 // hook
@@ -69,13 +73,11 @@ app.test(function (err, res) {
   console.log(res) // ['pre', 'hook', 'invoke']
 })
 
-// method call with promise
-app.test().then(function (res) {
-  console.log(res) // ['pre', 'hook', 'invoke']
-})
 ```
 
-Using promise:
+#### Promise
+
+By returning promise, value will be resolved before passing to next middleware or returning result. Promise reject ends the middleware sequence.
 
 ```js
 var ginga = require('ginga')
@@ -83,15 +85,39 @@ var app = ginga()
 
 // define method
 app.define('test', function (ctx) {
-  // return promise: 
-  //   pass to next middleware when resolved,
-  //   return error when rejected
-  return asyncFn.then(function (data) {
+  return fnAsync().then(function (data) {
     // do stuff
   })
-}, function (ctx, resolve, reject) {
-  // handle promise result
-  return asyncFn2.then(resolve).catch(reject)
+}, function (ctx) {
+  // returns result from last promise resolve
+  return fn2Async()
+})
+
+// method call with promise
+app.test().then(...).catch(...)
+```
+
+#### Generator
+
+In ES6 generators, functions can be paused and resumed using the `yield` keyword. 
+Both promise and callback are 'yieldable' in ginga middleware. 
+This enables powerful control flow while maintaining compatibility.
+
+```js
+var ginga = require('ginga')
+var app = ginga()
+
+app.define('test', function * (ctx, next) {
+  var foo = yield Promise.resolve('bar') // Promise is yieldable
+  yield setTimeout(next, 100) // callback based function is also yieldable
+  try {
+    ctx.key = yield fs.readfile('./foo/bar', next)
+  } catch (err) {
+    ctx.key = 'whatever'
+  }
+}, function (ctx) * {
+  // returns result
+  return yield db.get(ctx.key)
 })
 ```
 
