@@ -100,7 +100,7 @@ app.test().then(...).catch(...)
 #### Generator
 
 In ES6 generators, functions can be paused and resumed using the `yield` keyword. 
-Both promise and callback are 'yieldable' in ginga middleware. 
+Using [caco](https://github.com/cshum/caco), both promise and callback are 'yieldable' in ginga middleware. 
 This enables powerful control flow while maintaining compatibility.
 
 ```js
