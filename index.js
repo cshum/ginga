@@ -6,24 +6,19 @@ var Promise = require('pinkie-promise')
 
 function wrapGenerator (gen) {
   return function (ctx, callback) {
-    var iter = gen.call(this, ctx, function (err, res) {
-      process.nextTick(function () {
-        next(err, res)
-      })
-    })
-    function next (err, res) {
-      // generator next
+    function step (err, res) {
+      // generator step
       try {
         var state = err ? iter.throw(err) : iter.next(res)
         if (state.done) {
-          // generator done, next middleware
+          // generator done, callback middleware
           callback(null, state.value)
         } else if (state.value && is.function(state.value.then)) {
           // thenable
           state.value.then(function (res) {
-            next(null, res)
+            step(null, res)
           }, function (err) {
-            next(err || true)
+            step(err || true)
           })
         }
       } catch (err) {
@@ -31,7 +26,13 @@ function wrapGenerator (gen) {
         callback(err)
       }
     }
-    next()
+    function next (err, res) {
+      process.nextTick(function () {
+        step(err, res)
+      })
+    }
+    var iter = gen.call(this, ctx, next)
+    step()
   }
 }
 
