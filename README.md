@@ -1,6 +1,6 @@
 # Ginga.js
 
-Ginga is a utility module that enables middleware based control flow for creating async JavaScript methods. Supports callback, promise and ES6 generator.
+Middleware based control flow for defining async JavaScript methods using callback, promise or generator.
 
 [![Build Status](https://travis-ci.org/cshum/ginga.svg?branch=master)](https://travis-ci.org/cshum/ginga)
 

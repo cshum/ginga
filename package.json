@@ -1,7 +1,7 @@
 {
   "name": "ginga",
-  "version": "2.1.3",
-  "description": "Middleware framework for JavaScript functions",
+  "version": "3.0.0",
+  "description": "Middleware framework for async functions using callback, promise or generator",
   "scripts": {
     "test": "set -e; standard; for t in test/*.js; do node $t; done",
     "build": "rm -rf dist; mkdir dist; npm run browserify;",
@@ -21,7 +21,7 @@
   "license": "MIT",
   "dependencies": {
     "is-generator-function": "^1.0.3",
-    "pinkie-promise": "^1.0.0"
+    "pinkie-promise": "^2.0.0"
   },
   "devDependencies": {
     "derequire": "^2.0.0",
