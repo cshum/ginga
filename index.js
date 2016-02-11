@@ -4,6 +4,37 @@ var EventEmitter = require('events').EventEmitter
 var params = require('./params')
 var Promise = require('pinkie-promise')
 
+function wrapGenerator (gen) {
+  return function (ctx, callback) {
+    var iter = gen.call(this, ctx, function (err, res) {
+      process.nextTick(function () {
+        next(err, res)
+      })
+    })
+    function next (err, res) {
+      // generator next
+      try {
+        var state = err ? iter.throw(err) : iter.next(res)
+        if (state.done) {
+          // generator done, next middleware
+          callback(null, state.value)
+        } else if (state.value && is.function(state.value.then)) {
+          // thenable
+          state.value.then(function (res) {
+            next(null, res)
+          }, function (err) {
+            next(err || true)
+          })
+        }
+      } catch (err) {
+        // catch err, break generator
+        callback(err)
+      }
+    }
+    next()
+  }
+}
+
 // ginga use method
 function use () {
   // init hooks
@@ -38,7 +69,9 @@ function use () {
 
   for (i = 0, l = args.length; i < l; i++) {
     if (is.function(args[i])) {
-      this._hooks[name].push(args[i])
+      this._hooks[name].push(
+        is.generator(args[i]) ? wrapGenerator(args[i]) : args[i]
+      )
     } else if (is.array(args[i])) {
       // use('a', [fn1, fn2, fn3])
       for (j = 0, m = args[i].length; j < m; j++) {
@@ -49,7 +82,6 @@ function use () {
       throw new Error('Middleware must be a function')
     }
   }
-
   return this
 }
 
@@ -71,8 +103,12 @@ function define () {
 
   var invoke = args.pop()
   if (!is.function(invoke)) invoke = null
+  else if (is.generator(invoke)) invoke = wrapGenerator(invoke)
 
-  var pre = args
+  var pre = args.map(function (fn) {
+    if (!is.function(fn)) throw new Error('Middleware must be a function')
+    return is.generator(fn) ? wrapGenerator(fn) : fn
+  })
 
   // define scope method
   this[name] = function () {
@@ -107,32 +143,9 @@ function define () {
     ctx.args = args
     var index = 0
     var size = pipe.length
-    var iter = null
 
     function next (err, res) {
-      if (iter) {
-        // generator next
-        try {
-          var state = err ? iter.throw(err) : iter.next(res)
-          if (state.done) {
-            // generator done, next middleware
-            iter = null
-            index++
-            next(null, state.value)
-          } else if (state.value && is.function(state.value.then)) {
-            // thenable
-            state.value.then(function (res) {
-              next(null, res)
-            }, function (err) {
-              next(err || true)
-            })
-          }
-        } catch (err) {
-          // catch err, break generator
-          iter = null
-          next(err)
-        }
-      } else if (err || index === size) {
+      if (err || index === size) {
         // callback when err or end of pipeline
         if (callback) callback.apply(self, arguments)
         var args = ['end']
@@ -140,28 +153,18 @@ function define () {
         ctx.emit.apply(ctx, args)
       } else if (index < size) {
         var fn = pipe[index]
-        if (is.generator(fn)) {
-          iter = fn.call(self, ctx, function (err, res) {
-            process.nextTick(function () {
-              next(err, res)
-            })
+        index++
+        var val = fn.call(self, ctx, next)
+        if (val && is.function(val.then)) {
+          // thenable
+          val.then(function (res) {
+            next(null, res)
+          }, function (err) {
+            next(err || true)
           })
-          next()
-        } else {
-          index++
-          var val = fn.call(self, ctx, next)
-
-          if (val && is.function(val.then)) {
-            // thenable
-            val.then(function (res) {
-              next(null, res)
-            }, function (err) {
-              next(err || true)
-            })
-          } else if (fn.length < 2) {
-            // args without next(), not thenable
-            next(null, val)
-          }
+        } else if (fn.length < 2) {
+          // args without next(), not thenable
+          next(null, val)
         }
       }
     }
