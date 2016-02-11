@@ -2,37 +2,16 @@ var is = require('./is')
 var flatten = require('./flatten')
 var EventEmitter = require('events').EventEmitter
 var params = require('./params')
-var Promise = require('pinkie-promise')
+var caco = require('caco')
 
-function wrapGenerator (gen) {
-  return function (ctx, callback) {
-    function step (err, res) {
-      // generator step
-      try {
-        var state = err ? iter.throw(err) : iter.next(res)
-        if (state.done) {
-          // generator done, callback middleware
-          callback(null, state.value)
-        } else if (state.value && is.function(state.value.then)) {
-          // thenable
-          state.value.then(function (res) {
-            step(null, res)
-          }, function (err) {
-            step(err || true)
-          })
-        }
-      } catch (err) {
-        // catch err, break generator
-        callback(err)
-      }
-    }
-    function next (err, res) {
-      process.nextTick(function () {
-        step(err, res)
-      })
-    }
-    var iter = gen.call(this, ctx, next)
-    step()
+function wrapFn (gen) {
+  if (!is.function(gen)) throw new Error('Middleware must be a function')
+  if (!is.generator(gen)) return gen
+
+  // wrape generator with caco
+  var fn = caco(gen)
+  return function (ctx, next) {
+    fn.apply(this, arguments)
   }
 }
 
@@ -70,9 +49,7 @@ function use () {
 
   for (i = 0, l = args.length; i < l; i++) {
     if (is.function(args[i])) {
-      this._hooks[name].push(
-        is.generator(args[i]) ? wrapGenerator(args[i]) : args[i]
-      )
+      this._hooks[name].push(wrapFn(args[i]))
     } else if (is.array(args[i])) {
       // use('a', [fn1, fn2, fn3])
       for (j = 0, m = args[i].length; j < m; j++) {
@@ -102,14 +79,8 @@ function define () {
 
   if (!is.string(name)) throw new Error('Method name is not defined')
 
-  var invoke = args.pop()
-  if (!is.function(invoke)) invoke = null
-  else if (is.generator(invoke)) invoke = wrapGenerator(invoke)
-
-  var pre = args.map(function (fn) {
-    if (!is.function(fn)) throw new Error('Middleware must be a function')
-    return is.generator(fn) ? wrapGenerator(fn) : fn
-  })
+  var invoke = is.function(args[args.length - 1]) ? wrapFn(args.pop()) : null
+  var pre = args.map(wrapFn)
 
   // define scope method
   this[name] = function () {

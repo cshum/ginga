@@ -11,17 +11,11 @@
     "type": "git",
     "url": "git@github.com:cshum/ginga.git"
   },
-  "keywords": [
-    "api",
-    "util",
-    "hooks",
-    "middleware"
-  ],
   "author": "Adrian C Shum <adrian@cshum.com>",
   "license": "MIT",
   "dependencies": {
-    "is-generator-function": "^1.0.3",
-    "pinkie-promise": "^2.0.0"
+    "caco": "^1.0.0",
+    "is-generator-function": "^1.0.3"
   },
   "devDependencies": {
     "derequire": "^2.0.0",
