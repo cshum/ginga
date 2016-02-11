@@ -8,7 +8,7 @@ function wrapFn (gen) {
   if (!is.function(gen)) throw new Error('Middleware must be a function')
   if (!is.generator(gen)) return gen
 
-  // wrape generator with caco
+  // wrap generator with caco
   var fn = caco(gen)
   return function (ctx, next) {
     fn.apply(this, arguments)

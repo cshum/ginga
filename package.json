@@ -1,6 +1,6 @@
 {
   "name": "ginga",
-  "version": "3.0.0",
+  "version": "3.0.1",
   "description": "Middleware framework for async functions using callback, promise or generator",
   "scripts": {
     "test": "set -e; standard; for t in test/*.js; do node $t; done",
