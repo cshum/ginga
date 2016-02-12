@@ -139,8 +139,8 @@ var params = ginga.params
 var app = ginga()
 
 //define method with params parsing
-app.define('test', params('a', 'b:number?', 'c:string?'), function (ctx, done) {
-  done(null, ctx.params)
+app.define('test', params('a', 'b:number?', 'c:string?'), function (ctx) {
+  return ctx.params
 })
 
 //call method
@@ -166,12 +166,11 @@ var ginga = require('ginga')
 
 //define app
 var app = ginga() 
-app.define('test', function (ctx, next) {
+app.define('test', function (ctx) {
   ctx.logs = ['pre']
-  next()
-}, function (ctx, done) {
+}, function (ctx) {
   ctx.logs.push('invoke')
-  done(null, ctx.logs)
+  return ctx.logs
 })
 
 //define plugin
@@ -211,19 +210,16 @@ var a1 = new App()
 var a2 = new App()
 
 //prototype hook
-A.use('test', function (ctx, next) {
+A.use('test', function (ctx) {
   ctx.logs.push('A hook')
-  next()
 })
 
 //instance hook
-a1.use('test', function (ctx, next) {
+a1.use('test', function (ctx) {
   ctx.logs.push('a1 hook')
-  next()
 })
-a2.use('test', function (ctx, next) {
+a2.use('test', function (ctx) {
   ctx.logs.push('a2 hook')
-  next()
 })
 
 //call methods
