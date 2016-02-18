@@ -4,6 +4,7 @@ var EventEmitter = require('events').EventEmitter
 var params = require('./params')
 var caco = require('caco')
 
+// wrap ginga middleware function
 function wrapFn (gen) {
   if (!is.function(gen)) throw new Error('Middleware must be a function')
   if (!is.generator(gen)) return gen
@@ -11,7 +12,7 @@ function wrapFn (gen) {
   // wrap generator with caco
   var fn = caco(gen)
   return function (ctx, next) {
-    fn.apply(this, arguments)
+    fn.call(this, ctx, next)
   }
 }
 
@@ -118,24 +119,23 @@ function define () {
 
     function next (err, res) {
       if (err || index === size) {
+        var args = Array.prototype.slice.call(arguments)
         // callback when err or end of pipeline
-        if (callback) callback.apply(self, arguments)
-        var args = ['end']
-        Array.prototype.push.apply(args, arguments)
+        if (callback) callback.apply(self, args)
+        args.unshift('end')
         ctx.emit.apply(ctx, args)
       } else if (index < size) {
         var fn = pipe[index]
         index++
         var val = fn.call(self, ctx, next)
-        if (val && is.function(val.then)) {
-          // thenable
+        if (is.promise(val)) {
           val.then(function (res) {
             next(null, res)
           }, function (err) {
-            next(err || true)
+            next(err || new Error())
           })
         } else if (fn.length < 2) {
-          // args without next(), not thenable
+          // args without next() & not promise, sync func
           next(null, val)
         }
       }

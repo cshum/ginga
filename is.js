@@ -24,4 +24,7 @@ is.object = function (val) {
 is.array = Array.isArray || function (val) {
   return Object.prototype.toString.call(val) === '[object Array]'
 }
+is.promise = function (val) {
+  return val && typeof val.then === 'function'
+}
 is.generator = require('is-generator-function')
