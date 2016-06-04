@@ -10,7 +10,7 @@ function wrapFn (gen) {
   if (!is.generator(gen)) return gen
 
   // wrap generator with caco
-  var fn = caco(gen)
+  var fn = caco.wrap(gen)
   return function (ctx, next) {
     fn.call(this, ctx, next)
   }
@@ -38,8 +38,9 @@ function use () {
     // use(ginga)
     var key
     // concat hooks
-    for (key in args[0]._hooks)
+    for (key in args[0]._hooks) {
       use.call(this, key, args[0]._hooks[key])
+    }
     return this
   }
 

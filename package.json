@@ -14,12 +14,12 @@
   "author": "Adrian C Shum <adrian@cshum.com>",
   "license": "MIT",
   "dependencies": {
-    "caco": "^1.0.0",
+    "caco": "^2.0.0",
     "is-generator-function": "^1.0.3"
   },
   "devDependencies": {
     "derequire": "^2.0.0",
-    "standard": "^5.1.1",
+    "standard": "^7.1.2",
     "tape": "^3.0.2"
   }
 }
