@@ -2,15 +2,15 @@ var is = require('./is')
 var flatten = require('./flatten')
 var EventEmitter = require('events').EventEmitter
 var params = require('./params')
-var caco = require('caco')
+var raco = require('raco')
 
 // wrap ginga middleware function
 function wrapFn (gen) {
   if (!is.function(gen)) throw new Error('Middleware must be a function')
   if (!is.generator(gen)) return gen
 
-  // wrap generator with caco
-  var fn = caco.wrap(gen)
+  // wrap generator with raco
+  var fn = raco.wrap(gen)
   return function (ctx, next) {
     fn.call(this, ctx, next)
   }

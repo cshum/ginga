@@ -14,8 +14,8 @@
   "author": "Adrian C Shum <adrian@cshum.com>",
   "license": "MIT",
   "dependencies": {
-    "caco": "^2.0.0",
-    "is-generator-function": "^1.0.3"
+    "is-generator-function": "^1.0.3",
+    "raco": "^3.0.1"
   },
   "devDependencies": {
     "derequire": "^2.0.0",
